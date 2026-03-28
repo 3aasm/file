@@ -7,6 +7,14 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>تطبيق فلو | نقل الملفات</title>
 
+    <!-- App Web App Meta Tags -->
+    <meta name="theme-color" content="#0f1115">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="123.png">
+    <link rel="apple-touch-icon" href="123.png">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -269,55 +277,96 @@
                 </div>
 
                 <!-- صفحة إرسال ملف -->
-                <div id="page-send" class="app-page hidden max-w-3xl mx-auto mt-4">
-                    <div class="bg-darkSurface border border-darkBorder rounded-2xl p-6 md:p-8 shadow-xl">
-                        <h2 class="text-2xl font-bold text-textMain mb-6 text-center">إرسال ملف جديد</h2>
+                <div id="page-send" class="app-page hidden max-w-5xl mx-auto mt-2 pb-10">
+                    <div class="text-center mb-8 fade-in">
+                        <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl border border-primary/20 shadow-lg shadow-primary/10 transform -rotate-3">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </div>
+                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-indigo-400 to-purple-400">إرسال ملف جديد</h2>
+                        <p class="text-textMuted text-sm mt-3 font-medium">خطوتان سريعتان لاختيار المستلم ورفع الملف بسلاسة تامة.</p>
+                    </div>
 
-                        <div class="space-y-6">
-                            <!-- اختيار المستلم -->
-                            <div>
-                                <label class="block text-sm font-bold text-textMuted mb-2">اختر المستلم:</label>
-                                <div class="relative">
-                                    <div
-                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-textMuted">
-                                        <i class="fa-solid fa-search"></i>
-                                    </div>
-                                    <input type="text" id="recipient-search" placeholder="ابحث عن اسم المستخدم..."
-                                        oninput="filterRecipientList()"
-                                        class="w-full bg-darkBg border border-darkBorder rounded-xl pr-10 pl-4 py-3 focus:outline-none focus:border-primary text-textMain mb-3">
+                    <!-- شريط التنقل بين القسمين (مستوحى من الصورة) -->
+                    <div class="bg-darkBg p-1.5 rounded-[2rem] flex mx-auto max-w-sm border border-darkBorder mb-8 relative text-sm font-bold shadow-inner fade-in" style="animation-delay: 0.1s;">
+                        <div id="tab-indicator" class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(50%-6px)] rounded-[1.5rem] transition-all duration-300 shadow bg-[#2a303c] border border-darkBorder right-1.5 transform translate-x-0"></div>
+                        
+                        <button onclick="switchSendTab('recipient')" id="tab-btn-recipient" class="relative flex-1 py-3 z-10 text-textMain transition-colors">
+                            اختيار المستلم
+                        </button>
+                        <button onclick="switchSendTab('file')" id="tab-btn-file" class="relative flex-1 py-3 z-10 text-textMuted transition-colors text-center">
+                            رفع الملف المرفق
+                        </button>
+                    </div>
+
+                    <div class="fade-in max-w-2xl mx-auto" style="animation-delay: 0.2s;">
+                        
+                        <!-- القسم الأول: المستلم -->
+                        <div id="panel-recipient" class="bg-darkSurface border border-darkBorder rounded-3xl p-6 lg:p-8 shadow-xl relative overflow-hidden flex flex-col min-h-[480px]">
+                            <div class="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl translate-x-12 -translate-y-12 pointer-events-none"></div>
+                            
+                            <div class="flex items-center gap-4 mb-6 relative">
+                                <div class="w-10 h-10 rounded-xl bg-darkBg border border-darkBorder flex items-center justify-center text-primary font-bold shadow-inner">1</div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-textMain">اختيار المستلم</h3>
+                                    <p class="text-xs text-textMuted mt-1">ابحث عن الشخص المراد إرسال الملف إليه</p>
                                 </div>
-                                <div id="recipient-list"
-                                    class="bg-darkBg border border-darkBorder rounded-xl max-h-48 overflow-y-auto p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <!-- يتم التوليد برمجياً -->
-                                </div>
-                                <input type="hidden" id="selected-recipient-id">
                             </div>
 
-                            <!-- اختيار الملف -->
-                            <div>
-                                <label class="block text-sm font-bold text-textMuted mb-2">الملف المرفق:</label>
+                            <div class="relative mb-4 z-10">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-textMuted">
+                                    <i class="fa-solid fa-search"></i>
+                                </div>
+                                <input type="text" id="recipient-search" placeholder="ابحث عن اسم المستخدم..."
+                                    oninput="filterRecipientList()"
+                                    class="w-full bg-darkBg border border-darkBorder rounded-2xl pr-12 pl-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-textMain transition-all shadow-inner text-sm">
+                            </div>
+                            
+                            <div id="recipient-list" class="flex-1 overflow-y-auto pr-1 grid grid-cols-1 gap-2 custom-scrollbar relative z-10">
+                                <!-- يتم التوليد برمجياً -->
+                            </div>
+                            <input type="hidden" id="selected-recipient-id">
+                        </div>
+
+                        <!-- القسم الثاني: الملف والرفع -->
+                        <div id="panel-file" class="hidden flex-col gap-6">
+                            
+                            <div class="bg-darkSurface border border-darkBorder rounded-3xl p-6 lg:p-8 shadow-xl relative overflow-hidden flex-1 flex flex-col min-h-[480px]">
+                                <div class="absolute bottom-0 left-0 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl -translate-x-12 translate-y-12 pointer-events-none"></div>
+                                
+                                <div class="flex items-center gap-4 mb-6 relative">
+                                    <div class="w-10 h-10 rounded-xl bg-darkBg border border-darkBorder flex items-center justify-center text-emerald-400 font-bold shadow-inner">2</div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-textMain">رفع الملف المرفق</h3>
+                                        <p class="text-xs text-textMuted mt-1">الصور، المستندات، والملفات المضغوطة</p>
+                                    </div>
+                                </div>
+
                                 <input type="file" id="file-upload-input" class="hidden"
                                     onchange="handleFileSelection(event)"
                                     accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar">
+                                
                                 <div id="dropzone" onclick="document.getElementById('file-upload-input').click()"
-                                    class="dropzone rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer bg-darkBg">
-                                    <div id="file-preview-area" class="text-center w-full">
-                                        <div
-                                            class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-2xl text-primary mx-auto mb-4 border border-darkBorder">
+                                    class="dropzone flex-1 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-darkBg/50 border-2 border-dashed border-darkBorder hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all group relative z-10">
+                                    <div id="file-preview-area" class="text-center w-full flex flex-col items-center transition-transform group-hover:scale-105">
+                                        <div class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-5 border-4 border-darkBg shadow-lg relative">
                                             <i class="fa-solid fa-cloud-arrow-up"></i>
+                                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-darkBg rounded-full flex items-center justify-center border border-darkBorder">
+                                                <i class="fa-solid fa-plus text-[10px] text-textMain"></i>
+                                            </div>
                                         </div>
-                                        <p class="text-textMain font-bold mb-1" id="file-name-display">انقر لاختيار ملف
-                                            أو صورة</p>
-                                        <p class="text-textMuted text-xs" id="file-size-display">الحد الأقصى 10 ميجابايت
-                                        </p>
+                                        <p class="text-textMain font-bold text-lg mb-2" id="file-name-display">اضغط هنا أو اسحب الملف</p>
+                                        <div class="flex items-center gap-2 text-textMuted text-xs mt-1">
+                                            <span class="bg-darkSurface px-2 py-1 rounded-md border border-darkBorder">الحد الأقصى 10MB</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- زر الإرسال -->
                             <button onclick="submitTransfer()" id="btn-submit-transfer" disabled
-                                class="w-full bg-primary hover:bg-primaryHover disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2 mt-4">
-                                <i class="fa-solid fa-paper-plane"></i> إرسال الآن
+                                class="w-full bg-gradient-to-l from-primary to-indigo-600 hover:from-primaryHover hover:to-indigo-700 disabled:from-darkSurface disabled:to-darkSurface disabled:text-textMuted disabled:border disabled:border-darkBorder disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-primary/20 disabled:shadow-none flex items-center justify-center gap-3 text-lg transform hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:opacity-70 group">
+                                <i class="fa-solid fa-paper-plane group-hover:translate-x-1 group-disabled:translate-x-0 transition-transform"></i> 
+                                <span>إرسال الملف الآن</span>
                             </button>
                         </div>
                     </div>
@@ -467,8 +516,40 @@
             document.getElementById('sidebar').classList.remove('open');
 
             if (pageId === 'inbox' || pageId === 'outbox') renderFilesGrid();
-            if (pageId === 'send') renderSendFormUsers();
+            if (pageId === 'send') {
+                renderSendFormUsers();
+                if (window.switchSendTab) window.switchSendTab('recipient');
+            }
             if (pageId === 'contacts') renderContactsPage();
+        };
+
+        window.switchSendTab = (tabId) => {
+            const indicator = document.getElementById('tab-indicator');
+            const btnRecipient = document.getElementById('tab-btn-recipient');
+            const btnFile = document.getElementById('tab-btn-file');
+            
+            const panelRecipient = document.getElementById('panel-recipient');
+            const panelFile = document.getElementById('panel-file');
+
+            if (tabId === 'recipient') {
+                indicator.style.transform = 'translateX(0)';
+                btnRecipient.classList.replace('text-textMuted', 'text-textMain');
+                btnFile.classList.replace('text-textMain', 'text-textMuted');
+                
+                panelFile.classList.add('hidden');
+                panelFile.classList.remove('flex');
+                panelRecipient.classList.remove('hidden');
+                panelRecipient.classList.add('flex');
+            } else {
+                indicator.style.transform = 'translateX(-100%)';
+                btnFile.classList.replace('text-textMuted', 'text-textMain');
+                btnRecipient.classList.replace('text-textMain', 'text-textMuted');
+                
+                panelRecipient.classList.add('hidden');
+                panelRecipient.classList.remove('flex');
+                panelFile.classList.remove('hidden');
+                panelFile.classList.add('flex');
+            }
         };
 
         window.toggleSidebar = () => {
@@ -607,10 +688,10 @@
                 const isSelected = currentSelectedId === u.uid;
                 const html = `
                     <div onclick="selectRecipient('${u.uid}')" 
-                        class="cursor-pointer flex items-center gap-3 p-2 rounded-xl border ${isSelected ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-darkHover'} transition-all">
-                        <img src="${u.avatar}" class="w-8 h-8 rounded-full bg-darkBg border border-darkBorder">
-                        <span class="text-sm font-bold text-textMain truncate">${u.name}</span>
-                        ${isSelected ? `<i class="fa-solid fa-circle-check text-primary mr-auto text-sm"></i>` : ''}
+                        class="cursor-pointer flex items-center gap-4 p-3 rounded-2xl border ${isSelected ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5' : 'border-darkBorder bg-darkBg hover:bg-darkHover hover:border-textMuted/30'} transition-all group">
+                        <img src="${u.avatar}" class="w-10 h-10 rounded-full bg-darkBg border-2 ${isSelected ? 'border-primary' : 'border-darkBorder group-hover:border-textMuted/50'} transition-colors">
+                        <span class="text-sm font-bold ${isSelected ? 'text-primary' : 'text-textMain'} truncate">${u.name}</span>
+                        ${isSelected ? `<i class="fa-solid fa-circle-check text-primary text-xl mr-auto fade-in"></i>` : `<i class="fa-solid fa-chevron-left text-textMuted text-xs mr-auto opacity-0 group-hover:opacity-100 transition-opacity"></i>`}
                     </div>
                 `;
                 list.insertAdjacentHTML('beforeend', html);
@@ -638,15 +719,15 @@
             let sizeStr = file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
 
             const isImage = file.type.startsWith('image/');
-            const iconHtml = isImage ? `<i class="fa-solid fa-image text-blue-400"></i>` : `<i class="fa-solid fa-file-lines text-primary"></i>`;
+            const iconHtml = isImage ? `<i class="fa-solid fa-image text-blue-400"></i>` : `<i class="fa-solid fa-file-lines text-emerald-400"></i>`;
 
             document.getElementById('file-preview-area').innerHTML = `
-                <div class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-darkBorder">
+                <div class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-darkBorder shadow-lg">
                     ${iconHtml}
                 </div>
-                <p class="text-textMain font-bold mb-1 truncate px-4" dir="ltr">${file.name}</p>
-                <p class="text-textMuted text-xs">${sizeStr}</p>
-                <button onclick="clearFileSelection(event)" class="mt-3 text-xs text-rose-400 hover:text-rose-500 underline">إلغاء واختيار ملف آخر</button>
+                <p class="text-textMain font-bold mb-1 truncate px-4 w-full text-center" dir="ltr">${file.name}</p>
+                <p class="text-textMuted text-xs text-center font-bold">${sizeStr}</p>
+                <button onclick="clearFileSelection(event)" class="mt-4 text-sm font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-2 px-4 rounded-xl transition-colors shrink-0 flex items-center justify-center gap-2 mx-auto border border-rose-500/20"><i class="fa-solid fa-trash"></i> إزالة الملف المتصل</button>
             `;
 
             checkSendReady();
@@ -657,11 +738,16 @@
             selectedFile = null;
             document.getElementById('file-upload-input').value = '';
             document.getElementById('file-preview-area').innerHTML = `
-                <div class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-2xl text-primary mx-auto mb-4 border border-darkBorder">
+                <div class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-5 border-4 border-darkBg shadow-lg relative">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-darkBg rounded-full flex items-center justify-center border border-darkBorder">
+                        <i class="fa-solid fa-plus text-[10px] text-textMain"></i>
+                    </div>
                 </div>
-                <p class="text-textMain font-bold mb-1">انقر لاختيار ملف أو صورة</p>
-                <p class="text-textMuted text-xs">الحد الأقصى 10 ميجابايت</p>
+                <p class="text-textMain font-bold text-lg mb-2">اضغط هنا أو اسحب الملف</p>
+                <div class="flex items-center gap-2 text-textMuted text-xs mt-1">
+                    <span class="bg-darkSurface px-2 py-1 rounded-md border border-darkBorder">الحد الأقصى 10MB</span>
+                </div>
             `;
             checkSendReady();
         };

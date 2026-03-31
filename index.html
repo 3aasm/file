@@ -8,12 +8,10 @@
     <title>تطبيق فلو | نقل الملفات</title>
 
     <!-- App Web App Meta Tags -->
-    <meta name="theme-color" content="#111318">
+    <meta name="theme-color" content="#09090b">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="icon" href="123.png">
-    <link rel="apple-touch-icon" href="123.png">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +20,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
 
     <!-- Tailwind Configuration -->
     <script>
@@ -34,14 +33,15 @@
                         sans: ['Cairo', 'sans-serif'],
                     },
                     colors: {
-                        darkBg: '#0f1115',
-                        darkSurface: '#1a1d24',
-                        darkHover: '#252932',
-                        darkBorder: '#2a2e39',
-                        primary: '#6366f1',
+                        background: '#09090b', // Zinc 950
+                        surface: '#18181b',    // Zinc 900
+                        surfaceHover: '#27272a',// Zinc 800
+                        borderLine: '#27272a', // Zinc 800
+                        primary: '#6366f1',    // Indigo 500
                         primaryHover: '#4f46e5',
-                        textMain: '#f3f4f6',
-                        textMuted: '#9ca3af',
+                        accent: '#10b981',     // Emerald 500
+                        textMain: '#f4f4f5',   // Zinc 50
+                        textMuted: '#a1a1aa',  // Zinc 400
                     }
                 }
             }
@@ -51,10 +51,11 @@
     <style>
         body {
             -webkit-tap-highlight-color: transparent;
-            background-color: #0f1115;
-            color: #f3f4f6;
+            background-color: #09090b;
+            color: #f4f4f5;
         }
 
+        /* Custom Modern Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -65,22 +66,32 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background-color: #374151;
-            border-radius: 10px;
+            background-color: #3f3f46;
+            border-radius: 20px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background-color: #4b5563;
+            background-color: #52525b;
         }
 
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
         }
 
-        @keyframes fadeIn {
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Smooth Animations */
+        .fade-in-up {
+            animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(15px);
             }
 
             to {
@@ -89,19 +100,20 @@
             }
         }
 
-        .list-card {
-            transition: all 0.2s;
+        /* Modern Card Hover Effects */
+        .modern-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .list-card:hover {
+        .modern-card:hover {
+            border-color: #3f3f46;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
-            border-color: #374151;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        /* منطقة إسقاط الملفات */
+        /* Dropzone */
         .dropzone {
-            border: 2px dashed #2a2e39;
+            border: 2px dashed #27272a;
             transition: all 0.3s ease;
         }
 
@@ -111,267 +123,241 @@
             background-color: rgba(99, 102, 241, 0.05);
         }
 
-        /* تخصيص إخفاء شريط التمرير للبطاقات الأفقية */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
+        /* Safe area padding for mobile notch/status bar */
+        .pt-safe-top {
+            padding-top: max(2rem, env(safe-area-inset-top));
         }
 
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .pb-safe-bottom {
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
+
+        /* Active Nav indicator */
+        .nav-active {
+            background-color: #18181b;
+            color: #f4f4f5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 
-<body
-    class="font-sans h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white text-textMain bg-darkBg">
+<body class="font-sans h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white">
 
     <!-- شاشة التحميل -->
     <div id="loading-screen"
-        class="fixed inset-0 bg-darkBg z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="relative w-20 h-20 mb-6">
-            <div class="absolute inset-0 border-4 border-darkBorder rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
-            <i
-                class="fa-solid fa-cloud-arrow-up absolute inset-0 flex items-center justify-center text-2xl text-primary animate-pulse"></i>
+        class="fixed inset-0 bg-background z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-16 h-16 flex items-center justify-center mb-6">
+            <div class="absolute inset-0 border-4 border-surface rounded-2xl transform rotate-45"></div>
+            <div
+                class="absolute inset-0 border-4 border-primary rounded-2xl transform rotate-45 border-t-transparent animate-spin">
+            </div>
+            <i class="fa-solid fa-paper-plane text-xl text-primary animate-pulse relative z-10"></i>
         </div>
-        <h1 class="text-2xl font-bold tracking-wider text-textMain">فلو للملفات</h1>
-        <p class="text-textMuted text-sm mt-2">جاري مزامنة المنصة...</p>
+        <h1 class="text-2xl font-black tracking-widest text-textMain">FLOW</h1>
     </div>
 
-    <!-- نافذة إعداد الملف الشخصي (إلزامية) -->
+    <!-- نافذة تسجيل الدخول (إلزامية) -->
     <div id="setup-modal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] hidden flex flex-col items-center justify-center p-4 transition-all">
-        <div class="bg-darkSurface rounded-3xl p-8 max-w-sm w-full border border-darkBorder shadow-2xl fade-in">
-            <div class="text-center mb-8">
+        class="fixed inset-0 bg-black/90 backdrop-blur-md z-[90] hidden flex-col items-center justify-center p-4 transition-all">
+        <div
+            class="bg-surface border border-borderLine rounded-[2rem] p-8 md:p-10 max-w-sm w-full fade-in-up shadow-2xl relative overflow-hidden">
+            <!-- ديكور خلفي -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
+
+            <div class="text-center mb-8 relative z-10">
                 <div
-                    class="w-20 h-20 bg-darkBg text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner border border-darkBorder">
-                    <i class="fa-solid fa-folder-open"></i>
+                    class="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mx-auto mb-5 border border-borderLine shadow-inner transform rotate-3">
+                    <i class="fa-solid fa-bolt text-2xl text-primary"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-textMain">منصة فلو</h2>
-                <p class="text-textMuted text-sm mt-2">يجب تسجيل الدخول للإستمرار</p>
+                <h2 class="text-2xl font-black text-textMain tracking-wide">تسجيل الدخول</h2>
+                <p class="text-textMuted text-sm mt-2">يجب إنشاء حساب أو تسجيل الدخول للبدء</p>
             </div>
-            <div class="relative mb-4">
-                <i class="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
-                <input type="text" id="setup-name-input" placeholder="اسم المستخدم..."
-                    class="w-full bg-darkBg border border-darkBorder rounded-xl pr-12 pl-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-textMain">
+
+            <div class="space-y-4 relative z-10">
+                <div class="relative">
+                    <i class="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
+                    <input type="text" id="setup-name-input" placeholder="اسم المستخدم"
+                        class="w-full bg-background border border-borderLine rounded-2xl pr-11 pl-4 py-4 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
+                </div>
+                <div class="relative">
+                    <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
+                    <input type="password" id="setup-password-input" placeholder="كلمة المرور (6 أحرف فأكثر)"
+                        class="w-full bg-background border border-borderLine rounded-2xl pr-11 pl-4 py-4 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
+                </div>
+                <button onclick="saveUserProfile()"
+                    class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-4 rounded-2xl transition-all mt-4 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98]">
+                    <span id="auth-btn-text">دخول مساحة العمل</span>
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </button>
             </div>
-            <div class="relative mb-6">
-                <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
-                <input type="password" id="setup-password-input" placeholder="كلمة المرور (6 أحرف على الأقل)..."
-                    class="w-full bg-darkBg border border-darkBorder rounded-xl pr-12 pl-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-textMain">
-            </div>
-            <button onclick="saveUserProfile()"
-                class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
-                <span id="auth-btn-text">دخول أو تسجيل جديد</span>
-                <i class="fa-solid fa-arrow-left text-sm"></i>
-            </button>
         </div>
     </div>
 
     <!-- نافذة اختيار المستلم -->
     <div id="recipient-modal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex flex-col items-center justify-center p-4 transition-all">
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex-col items-center justify-center p-4 transition-all">
         <div
-            class="bg-darkSurface rounded-3xl p-6 max-w-md w-full border border-darkBorder shadow-2xl fade-in flex flex-col h-[70vh] max-h-[600px]">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-textMain">اختيار المستلم</h3>
+            class="bg-surface border border-borderLine rounded-[2rem] p-6 max-w-md w-full flex flex-col h-[75vh] max-h-[600px] fade-in-up shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-textMain">تحديد المستلم</h3>
                 <button onclick="closeRecipientModal()"
-                    class="w-8 h-8 flex items-center justify-center rounded-full bg-darkBg hover:bg-rose-500/20 text-textMuted hover:text-rose-400 transition-colors">
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-background hover:bg-borderLine text-textMuted transition-colors border border-borderLine">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div class="relative mb-4 shrink-0">
-                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-textMuted">
-                    <i class="fa-solid fa-search"></i>
-                </div>
-                <input type="text" id="recipient-search" placeholder="ابحث عن مستخدم بالاسم..."
+                <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
+                <input type="text" id="recipient-search" placeholder="ابحث في دليل المستخدمين..."
                     oninput="filterRecipientModalList()"
-                    class="w-full bg-darkBg border border-darkBorder rounded-xl pr-10 pl-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-textMain transition-all shadow-inner text-sm">
+                    class="w-full bg-background border border-borderLine rounded-2xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary text-textMain transition-all text-sm">
             </div>
-            <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 hide-scrollbar">
+            <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 hide-scrollbar pb-2">
                 <!-- يتم التوليد برمجياً -->
             </div>
         </div>
     </div>
 
     <!-- الهيكل الرئيسي -->
-    <div class="w-full h-full flex flex-col overflow-hidden relative">
+    <div class="w-full h-full flex flex-col overflow-hidden relative z-10 bg-background">
 
-        <!-- شريط التنقل العلوي -->
-        <header class="w-full flex flex-col z-20 bg-darkBg border-b border-darkBorder shadow-md shrink-0">
+        <!-- الهيدر (Header) للديسكتوب والموبايل -->
+        <!-- استخدام pt-safe-top لإبعاد الشعار عن البطارية في الجوال -->
+        <header class="w-full flex-none z-30 pt-safe-top px-4 md:px-8 pb-4">
 
-            <!-- الصف الأول: الشعار (مع هوامش أكبر للجوال لتفادي البطارية/الشبكة) + زر تسجيل الخروج -->
+            <!-- تصميم الهيدر ككبسولة عائمة (Floating Pill) -->
             <div
-                class="w-full px-4 md:px-8 pt-12 pb-3 md:pt-4 md:pb-4 bg-[#111318] border-b border-darkBorder/50 flex items-center">
-                <div class="flex items-center gap-3 w-full max-w-6xl mx-auto relative">
-                    <i class="fa-solid fa-folder-open text-primary text-xl md:text-2xl"></i>
-                    <span class="text-primary font-black text-xl md:text-2xl tracking-widest">فلو</span>
-                    <!-- الخط الممتد إلى اليسار -->
+                class="max-w-6xl mx-auto bg-surface/80 backdrop-blur-md border border-borderLine rounded-2xl h-16 flex items-center justify-between px-4 md:px-6 shadow-sm">
+
+                <!-- القسم الأيمن: الشعار -->
+                <div class="flex items-center gap-3">
                     <div
-                        class="h-[2px] bg-gradient-to-l from-primary/50 via-primary/10 to-transparent flex-1 ml-4 rounded-full">
+                        class="w-8 h-8 bg-gradient-to-br from-primary to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-md transform rotate-3">
+                        <i class="fa-solid fa-bolt text-sm"></i>
+                    </div>
+                    <span class="font-black text-xl tracking-wider text-textMain">FLOW</span>
+                </div>
+
+                <!-- القسم الأوسط: التنقل (ديسكتوب فقط) -->
+                <nav class="hidden md:flex bg-background p-1 rounded-xl border border-borderLine">
+                    <button onclick="navigate('inbox')" id="tab-inbox"
+                        class="nav-active w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الوارد</button>
+                    <button onclick="navigate('outbox')" id="tab-outbox"
+                        class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الصادر</button>
+                    <button onclick="navigate('send')" id="tab-send"
+                        class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">إرسال</button>
+                    <button onclick="navigate('contacts')" id="tab-contacts"
+                        class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الدليل</button>
+                </nav>
+
+                <!-- القسم الأيسر: البروفايل والخروج -->
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 hidden sm:flex">
+                        <div class="text-left">
+                            <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[100px]">...
+                            </h1>
+                            <p class="text-[10px] text-textMuted font-medium uppercase tracking-wider">متصل الآن</p>
+                        </div>
+                        <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
+                            class="w-9 h-9 rounded-full border border-borderLine bg-background">
                     </div>
 
-                    <!-- زر تسجيل الخروج -->
+                    <div class="w-px h-6 bg-borderLine hidden sm:block"></div>
+
                     <button onclick="logoutUser()"
-                        class="w-9 h-9 flex items-center justify-center rounded-full bg-darkSurface border border-darkBorder hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-500 transition-all absolute left-0 shrink-0 text-textMuted shadow-sm"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-background hover:bg-rose-500/10 text-textMuted hover:text-rose-400 transition-colors border border-borderLine"
                         title="تسجيل الخروج">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
-            </div>
 
-            <!-- الصف الثاني: البروفايل يمين + شريط الأقسام يسار/وسط -->
-            <div class="w-full px-4 md:px-8 py-4 flex justify-center">
-                <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
-
-                    <!-- زر البروفايل -->
-                    <div
-                        class="flex items-center gap-3 shrink-0 bg-darkSurface border border-darkBorder rounded-full py-1.5 pr-1.5 pl-5 hover:border-primary/40 transition-all shadow-sm w-full lg:w-auto justify-between lg:justify-start">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
-                                    class="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover border-2 border-darkBorder bg-darkBg shadow-sm">
-                                <div
-                                    class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border border-darkBg rounded-full">
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[120px]">
-                                    جاري التحميل...</h1>
-                                <p class="text-[10px] text-textMuted mt-0.5">حساب نشط</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- شريط الأقسام (الكبسولة) -->
-                    <div
-                        class="bg-[#15181e] p-1.5 rounded-[2rem] flex flex-1 w-full border border-darkBorder relative text-xs md:text-sm font-bold shadow-inner overflow-x-auto hide-scrollbar">
-                        <div id="nav-indicator"
-                            class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(25%-3px)] rounded-[1.5rem] transition-all duration-300 shadow bg-[#2a303c] border border-darkBorder right-1.5 z-0"
-                            style="right: 1.5px;"></div>
-
-                        <button onclick="navigate('inbox', 0)" id="tab-inbox"
-                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-white transition-colors text-center flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-inbox"></i> <span class="hidden sm:inline">الوارد</span>
-                        </button>
-                        <button onclick="navigate('outbox', 1)" id="tab-outbox"
-                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-textMuted transition-colors text-center flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">الصادر</span>
-                        </button>
-                        <button onclick="navigate('send', 2)" id="tab-send"
-                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-textMuted transition-colors text-center flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-plus-circle"></i> <span class="hidden sm:inline">إرسال</span>
-                        </button>
-                        <button onclick="navigate('contacts', 3)" id="tab-contacts"
-                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-textMuted transition-colors text-center flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-users"></i> <span class="hidden sm:inline">الدليل</span>
-                        </button>
-                    </div>
-
-                </div>
             </div>
         </header>
 
         <!-- منطقة المحتوى الرئيسية -->
-        <main class="flex-1 bg-darkBg relative w-full h-full overflow-y-auto">
-
-            <!-- حاوية الصفحات -->
-            <div class="p-4 md:p-8 max-w-6xl mx-auto h-full">
+        <main class="flex-1 relative w-full h-full overflow-y-auto pb-24 md:pb-8"> <!-- مسافة سفلية للموبايل -->
+            <div class="max-w-4xl mx-auto px-4 md:px-8 h-full">
 
                 <!-- صفحة صندوق الوارد -->
-                <div id="page-inbox" class="app-page h-full w-full">
-                    <div class="flex flex-col w-full h-full">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-bold text-textMain"><i
-                                    class="fa-solid fa-inbox ml-2 text-primary"></i>صندوق الوارد</h2>
-                            <span id="inbox-count"
-                                class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
-                                ملفات</span>
+                <div id="page-inbox" class="app-page h-full w-full fade-in-up">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-black text-textMain">الوارد</h2>
+                            <p class="text-sm text-textMuted mt-1">الملفات التي استلمتها مؤخراً</p>
                         </div>
-                        <div id="inbox-grid" class="flex flex-col gap-3 pb-10 w-full">
-                            <!-- ملفات الوارد -->
+                        <div class="bg-surface border border-borderLine rounded-xl px-4 py-2 flex items-center gap-2">
+                            <span class="text-xs text-textMuted font-bold">الإجمالي:</span>
+                            <span id="inbox-count" class="text-primary font-black text-sm">0</span>
                         </div>
                     </div>
+                    <div id="inbox-grid" class="flex flex-col gap-3 w-full pb-6"></div>
                 </div>
 
                 <!-- صفحة صندوق الصادر -->
-                <div id="page-outbox" class="app-page hidden h-full w-full">
-                    <div class="flex flex-col w-full h-full">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-bold text-textMain"><i
-                                    class="fa-solid fa-paper-plane ml-2 text-primary"></i>صندوق الصادر</h2>
-                            <span id="outbox-count"
-                                class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
-                                ملفات</span>
+                <div id="page-outbox" class="app-page hidden h-full w-full fade-in-up">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-black text-textMain">الصادر</h2>
+                            <p class="text-sm text-textMuted mt-1">سجل الملفات المرسلة</p>
                         </div>
-                        <div id="outbox-grid" class="flex flex-col gap-3 pb-10 w-full">
-                            <!-- ملفات الصادر -->
+                        <div class="bg-surface border border-borderLine rounded-xl px-4 py-2 flex items-center gap-2">
+                            <span class="text-xs text-textMuted font-bold">الإجمالي:</span>
+                            <span id="outbox-count" class="text-primary font-black text-sm">0</span>
                         </div>
                     </div>
+                    <div id="outbox-grid" class="flex flex-col gap-3 w-full pb-6"></div>
                 </div>
 
                 <!-- صفحة إرسال ملف -->
-                <div id="page-send" class="app-page hidden h-full w-full">
-                    <div class="flex flex-col h-full max-w-3xl mx-auto w-full">
-                        <div class="text-center mb-8 fade-in shrink-0">
-                            <h2
-                                class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-indigo-400 to-purple-400">
-                                إرسال ملف جديد</h2>
-                            <p class="text-textMuted text-sm mt-2 font-medium">اختر المستلم وارفع الملف (حتى 100
-                                ميجابايت).</p>
+                <div id="page-send" class="app-page hidden h-full w-full fade-in-up">
+                    <div class="flex flex-col h-full max-w-2xl mx-auto w-full">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-black text-textMain mb-2">إرسال ملف</h2>
+                            <p class="text-textMuted text-sm">حدد المستلم وارفع الملف بضغطة واحدة (حتى 100MB)</p>
                         </div>
 
                         <div
-                            class="fade-in bg-darkSurface border border-darkBorder rounded-3xl p-5 md:p-8 shadow-2xl flex flex-col relative overflow-hidden w-full">
-                            <div
-                                class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-x-32 translate-y-32 pointer-events-none">
-                            </div>
-                            <div
-                                class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl translate-x-32 -translate-y-32 pointer-events-none">
-                            </div>
+                            class="bg-surface border border-borderLine rounded-[2rem] p-5 md:p-8 flex flex-col w-full shadow-lg">
 
+                            <!-- منطقة رفع الملف -->
                             <input type="file" id="file-upload-input" class="hidden"
                                 onchange="handleFileSelection(event)"
                                 accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar">
 
                             <div id="dropzone" onclick="document.getElementById('file-upload-input').click()"
-                                class="dropzone rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer bg-darkBg/50 border-2 border-dashed border-darkBorder hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all group relative z-10 mb-6 min-h-[250px] w-full">
-                                <div id="file-preview-area"
-                                    class="text-center w-full flex flex-col items-center transition-transform group-hover:scale-105">
+                                class="dropzone rounded-[1.5rem] p-8 flex flex-col items-center justify-center cursor-pointer bg-background min-h-[240px] w-full mb-6 group">
+                                <div id="file-preview-area" class="text-center w-full flex flex-col items-center">
                                     <div
-                                        class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-4 border-2 border-darkBg shadow-lg relative">
-                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        class="w-20 h-20 rounded-[1rem] bg-surface border border-borderLine flex items-center justify-center text-3xl text-primary mb-4 group-hover:scale-110 transition-transform shadow-sm transform -rotate-3">
+                                        <i class="fa-solid fa-cloud-upload-alt"></i>
                                     </div>
-                                    <p class="text-textMain font-bold text-lg mb-1" id="file-name-display">اضغط هنا أو
-                                        اسحب الملف</p>
-                                    <div class="flex items-center gap-2 text-textMuted text-sm mt-2">
-                                        <span
-                                            class="bg-darkSurface px-3 py-1 rounded-md border border-darkBorder text-emerald-400/80">الحد
-                                            الأقصى 100MB</span>
-                                    </div>
+                                    <h3 class="text-textMain font-bold text-base mb-1" id="file-name-display">انقر أو
+                                        اسحب الملف هنا</h3>
+                                    <span
+                                        class="text-textMuted text-xs bg-surface px-3 py-1 rounded-lg border border-borderLine mt-2">الحد
+                                        الأقصى 100 ميجابايت</span>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col sm:flex-row gap-4 relative z-10 w-full">
+                            <!-- الأزرار السفلية -->
+                            <div class="flex flex-col sm:flex-row gap-3 w-full mt-auto">
                                 <input type="hidden" id="selected-recipient-id">
 
                                 <button id="btn-open-recipient-modal" onclick="openRecipientModal()"
-                                    class="flex-1 bg-darkBg border-2 border-darkBorder hover:border-primary/50 text-textMain font-bold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-3 min-h-[60px]">
-                                    <i class="fa-solid fa-user-plus text-primary text-xl"></i>
-                                    <span id="recipient-btn-text" class="truncate">اختيار المستلم</span>
+                                    class="flex-1 bg-background border border-borderLine hover:border-primary/50 text-textMain font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-user-plus text-primary"></i>
+                                    <span id="recipient-btn-text" class="truncate text-sm">اختيار المستلم</span>
                                 </button>
 
                                 <button onclick="submitTransfer()" id="btn-submit-transfer" disabled
-                                    class="flex-[2] relative overflow-hidden bg-gradient-to-l from-primary to-indigo-600 hover:from-primaryHover hover:to-indigo-700 disabled:from-darkSurface disabled:to-darkSurface disabled:text-textMuted disabled:border disabled:border-darkBorder disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-primary/20 disabled:shadow-none min-h-[60px] group">
+                                    class="flex-[1.5] relative overflow-hidden bg-primary hover:bg-primaryHover disabled:bg-surface disabled:text-textMuted disabled:border-borderLine disabled:border disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all min-h-[56px] active:scale-[0.98]">
+                                    <!-- شريط التقدم -->
                                     <div id="upload-progress-bar"
-                                        class="absolute top-0 right-0 bottom-0 bg-emerald-500 w-0 transition-all duration-300 z-0">
+                                        class="absolute top-0 right-0 bottom-0 bg-white/20 w-0 transition-all duration-300 z-0">
                                     </div>
-                                    <div
-                                        class="relative z-10 flex items-center justify-center gap-3 w-full h-full text-lg">
-                                        <i id="btn-submit-icon"
-                                            class="fa-solid fa-paper-plane group-hover:-translate-x-1 group-disabled:translate-x-0 transition-transform"></i>
-                                        <span id="btn-submit-text">إرسال الملف الآن</span>
+
+                                    <div class="relative z-10 flex items-center justify-center gap-2 w-full h-full">
+                                        <i id="btn-submit-icon" class="fa-solid fa-paper-plane text-sm"></i>
+                                        <span id="btn-submit-text" class="text-sm">إرسال الآن</span>
                                     </div>
                                 </button>
                             </div>
@@ -380,27 +366,57 @@
                 </div>
 
                 <!-- صفحة جهات الاتصال -->
-                <div id="page-contacts" class="app-page hidden h-full w-full">
-                    <div class="flex flex-col w-full h-full">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-bold text-textMain"><i
-                                    class="fa-solid fa-users ml-2 text-primary"></i>دليل المستخدمين</h2>
-                            <div class="relative w-48 md:w-64">
-                                <input type="text" id="contacts-search-input" oninput="renderContactsPage()"
-                                    placeholder="بحث..."
-                                    class="w-full bg-darkSurface border border-darkBorder rounded-full py-2 pr-10 pl-4 text-sm focus:border-primary outline-none text-textMain">
-                                <i
-                                    class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-xs"></i>
-                            </div>
+                <div id="page-contacts" class="app-page hidden h-full w-full fade-in-up">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-3xl font-black text-textMain">الدليل</h2>
+                            <p class="text-sm text-textMuted mt-1">جميع مستخدمي المنصة</p>
                         </div>
-                        <div id="contacts-page-grid" class="flex flex-col gap-3 pb-10 w-full">
-                            <!-- جهات الاتصال -->
+                        <div class="relative w-full sm:w-64">
+                            <i
+                                class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
+                            <input type="text" id="contacts-search-input" oninput="renderContactsPage()"
+                                placeholder="بحث بالاسم..."
+                                class="w-full bg-surface border border-borderLine rounded-xl py-3 pr-11 pl-4 text-sm focus:outline-none focus:border-primary text-textMain">
                         </div>
+                    </div>
+                    <div id="contacts-page-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full pb-6">
+                        <!-- جهات الاتصال -->
                     </div>
                 </div>
 
             </div>
         </main>
+
+        <!-- شريط التنقل السفلي للموبايل (Bottom Nav) -->
+        <!-- استخدام pb-safe-bottom للابتعاد عن خط الايفون السفلي -->
+        <nav
+            class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-xl border-t border-borderLine flex justify-around items-center px-2 pt-3 pb-safe-bottom z-40">
+            <button onclick="navigate('inbox')" id="mobile-tab-inbox"
+                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-primary transition-colors">
+                <i class="fa-solid fa-inbox text-xl"></i>
+                <span class="text-[10px] font-bold">الوارد</span>
+            </button>
+            <button onclick="navigate('outbox')" id="mobile-tab-outbox"
+                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors">
+                <i class="fa-solid fa-paper-plane text-xl"></i>
+                <span class="text-[10px] font-bold">الصادر</span>
+            </button>
+            <button onclick="navigate('send')" id="mobile-tab-send"
+                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors relative">
+                <div
+                    class="absolute -top-8 bg-primary text-white w-14 h-14 rounded-2xl flex items-center justify-center border-4 border-background shadow-lg transform rotate-3">
+                    <i class="fa-solid fa-plus text-2xl"></i>
+                </div>
+                <span class="text-[10px] font-bold mt-8">إرسال</span>
+            </button>
+            <button onclick="navigate('contacts')" id="mobile-tab-contacts"
+                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors">
+                <i class="fa-solid fa-users text-xl"></i>
+                <span class="text-[10px] font-bold">الدليل</span>
+            </button>
+        </nav>
+
     </div>
 
     <!-- Firebase و JavaScript -->
@@ -444,6 +460,7 @@
 
                     loading.classList.add('opacity-0', 'pointer-events-none');
                     setupModal.classList.add('hidden');
+                    setupModal.classList.remove('flex');
 
                     if (userSnap.exists()) {
                         myUser = { ...userSnap.data(), uid: user.uid };
@@ -451,37 +468,34 @@
                         startDataListeners();
                     } else {
                         setupModal.classList.remove('hidden');
+                        setupModal.classList.add('flex');
                     }
                 } catch (error) {
-                    console.error("Firebase connection error:", error);
                     loading.innerHTML = `
-                        <div class="relative w-20 h-20 mb-6 flex items-center justify-center mx-auto">
-                            <i class="fa-solid fa-wifi text-5xl text-rose-500 opacity-80"></i>
+                        <div class="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mb-4 border border-borderLine">
+                            <i class="fa-solid fa-wifi text-3xl text-rose-500"></i>
                         </div>
-                        <h1 class="text-2xl font-bold tracking-wider text-rose-400">تعذر الاتصال بالخادم</h1>
-                        <button onclick="window.location.reload()" class="mt-8 px-8 py-3 bg-darkSurface border border-darkBorder hover:border-rose-500/50 hover:text-rose-400 text-textMain font-bold rounded-xl transition-colors shadow-lg">إعادة تحميل الصفحة</button>
+                        <h1 class="text-xl font-bold text-textMain">لا يوجد اتصال</h1>
+                        <button onclick="window.location.reload()" class="mt-6 px-6 py-3 bg-surface border border-borderLine rounded-xl text-sm font-bold text-textMain hover:bg-borderLine transition-colors">إعادة المحاولة</button>
                     `;
                 }
             } else {
                 loading.classList.add('opacity-0', 'pointer-events-none');
-                setupModal.classList.remove('hidden'); // إلزامي تسجيل الدخول
+                setupModal.classList.remove('hidden');
+                setupModal.classList.add('flex');
             }
         });
 
-        // تسجيل الخروج
         window.logoutUser = () => {
-            signOut(auth).catch((error) => {
-                alert("حدث خطأ أثناء تسجيل الخروج");
-            });
+            signOut(auth);
         };
 
-        // 2. إعداد الحساب
         window.saveUserProfile = async () => {
             const nameInput = document.getElementById('setup-name-input').value.trim();
             const passInput = document.getElementById('setup-password-input').value;
 
             if (!nameInput) return alert('يرجى كتابة اسمك');
-            if (!passInput || passInput.length < 6) return alert('يرجى إدخال كلمة مرور تتكون من 6 أحرف أو أرقام على الأقل');
+            if (!passInput || passInput.length < 6) return alert('كلمة المرور قصيرة جداً');
 
             const hexName = Array.from(nameInput.toLowerCase()).map(c => c.charCodeAt(0).toString(16)).join('');
             const syntheticEmail = `u_${hexName}@flow.local`;
@@ -493,18 +507,16 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, syntheticEmail, passInput);
                 const user = userCredential.user;
-
                 const seed = Math.random().toString(36).substring(7);
                 const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=6366f1`;
 
-                const newUserData = { name: nameInput, avatar: avatarUrl, timestamp: serverTimestamp() };
-                await setDoc(doc(db, USERS_PATH, user.uid), newUserData);
+                await setDoc(doc(db, USERS_PATH, user.uid), { name: nameInput, avatar: avatarUrl, timestamp: serverTimestamp() });
             } catch (err) {
                 if (err.code === 'auth/email-already-in-use') {
                     try {
                         await signInWithEmailAndPassword(auth, syntheticEmail, passInput);
                     } catch (signErr) {
-                        alert('هذا الاسم مسجل مسبقاً! كلمة المرور خاطئة.');
+                        alert('اسم المستخدم موجود مسبقاً بكلمة مرور مختلفة.');
                     }
                 } else {
                     alert('حدث خطأ: ' + err.message);
@@ -520,30 +532,44 @@
         }
 
         // 3. التنقل
-        window.navigate = (pageId, index) => {
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-white');
-                btn.classList.add('text-textMuted');
+        window.navigate = (pageId) => {
+            // تحديث تصميم أزرار الديسكتوب
+            ['inbox', 'outbox', 'send', 'contacts'].forEach(id => {
+                const btn = document.getElementById(`tab-${id}`);
+                const mobBtn = document.getElementById(`mobile-tab-${id}`);
+
+                if (btn) {
+                    if (id === pageId) {
+                        btn.className = 'nav-active w-24 py-1.5 rounded-lg text-sm font-bold transition-all';
+                    } else {
+                        btn.className = 'text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all';
+                    }
+                }
+                if (mobBtn) {
+                    if (id === 'send') return;
+                    if (id === pageId) {
+                        mobBtn.classList.remove('text-textMuted');
+                        mobBtn.classList.add('text-primary');
+                    } else {
+                        mobBtn.classList.remove('text-primary');
+                        mobBtn.classList.add('text-textMuted');
+                    }
+                }
             });
-            const activeBtn = document.getElementById(`tab-${pageId}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-textMuted');
-                activeBtn.classList.add('text-white');
-            }
 
-            const indicator = document.getElementById('nav-indicator');
-            if (index !== undefined) {
-                indicator.style.right = `calc(${index * 25}% + 1.5px)`;
-            }
-
+            // تبديل الصفحات
             document.querySelectorAll('.app-page').forEach(page => {
                 page.classList.add('hidden');
-                page.classList.remove('block');
+                page.classList.remove('block', 'fade-in-up');
             });
 
             const targetPage = document.getElementById(`page-${pageId}`);
             targetPage.classList.remove('hidden');
             targetPage.classList.add('block');
+
+            // Trigger reflow
+            void targetPage.offsetWidth;
+            targetPage.classList.add('fade-in-up');
 
             currentPage = pageId;
 
@@ -583,7 +609,7 @@
             });
         }
 
-        // 5. عرض الملفات (بالتصميم الأفقي المطابق للصورة للجوال والديسكتوب)
+        // 5. عرض الملفات (أفقي متجاوب ومطابق للصورة)
         function renderFilesGrid() {
             const isInbox = currentPage === 'inbox';
             const gridId = isInbox ? 'inbox-grid' : 'outbox-grid';
@@ -596,24 +622,26 @@
                 isInbox ? f.receiverId === myUser.uid : f.senderId === myUser.uid
             );
 
-            document.getElementById(countId).textContent = `${filesToShow.length} ملفات`;
+            document.getElementById(countId).textContent = filesToShow.length;
 
             if (filesToShow.length === 0) {
                 container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-20 text-textMuted text-center w-full">
-                        <i class="fa-solid fa-folder-open text-6xl mb-4 opacity-20"></i>
-                        <p class="text-lg">لا توجد ملفات ${isInbox ? 'واردة' : 'صادرة'} بعد.</p>
+                    <div class="flex flex-col items-center justify-center py-20 text-textMuted/50 text-center w-full bg-surface border border-borderLine rounded-[2rem]">
+                        <div class="w-20 h-20 bg-background rounded-2xl flex items-center justify-center mb-4 border border-borderLine">
+                            <i class="fa-solid fa-folder-open text-3xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-textMuted">لا توجد ملفات</p>
                     </div>`;
                 return;
             }
 
             filesToShow.forEach(file => {
                 const otherUserId = isInbox ? file.senderId : file.receiverId;
-                const otherUser = usersData.find(u => u.uid === otherUserId) || { name: 'مستخدم محذوف', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G' };
+                const otherUser = usersData.find(u => u.uid === otherUserId) || { name: 'حساب محذوف', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G' };
 
                 let timeStr = '';
                 if (file.timestamp) {
-                    timeStr = file.timestamp.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    timeStr = file.timestamp.toDate().toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 }
 
                 let iconHtml = '';
@@ -621,52 +649,52 @@
                 let fileSizeDisplay = file.fileSize || 'مضغوطة';
                 let actionHtml = '';
 
+                // الألوان مطابقة للصورة المرفقة
                 if (file.type === 'image') {
-                    iconHtml = `<div class="w-10 h-10 md:w-12 md:h-12 bg-[#1a2332] text-blue-400 rounded-xl flex items-center justify-center text-lg md:text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
-                    actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs md:text-sm font-bold py-2 px-4 md:py-2.5 md:px-6 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> تحميل</a>`;
+                    iconHtml = `<div class="w-12 h-12 bg-[#1a2332] text-[#60a5fa] rounded-[14px] flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
+                    actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-sm font-bold py-2.5 px-6 rounded-xl transition-colors flex items-center gap-2 shrink-0"><i class="fa-solid fa-download"></i> تحميل</a>`;
                 } else if (file.type === 'file_chunked') {
-                    iconHtml = `<div class="w-10 h-10 md:w-12 md:h-12 bg-[#172621] text-[#22c55e] rounded-xl flex items-center justify-center text-lg md:text-xl shrink-0"><i class="fa-solid fa-file-lines"></i></div>`;
-                    actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs md:text-sm font-bold py-2 px-4 md:py-2.5 md:px-6 rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> تحميل</button>`;
+                    iconHtml = `<div class="w-12 h-12 bg-[#172621] text-[#22c55e] rounded-[14px] flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-file-lines"></i></div>`;
+                    actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-sm font-bold py-2.5 px-6 rounded-xl transition-all flex items-center gap-2 shrink-0"><i class="fa-solid fa-download"></i> تحميل</button>`;
                 }
 
-                // تصميم متجاوب (Responsive) يطوى بذكاء في الجوال ويظهر كخط واحد في الديسكتوب
+                // تصميم البطاقة الأفقية المدمجة
                 const cardHtml = `
-                    <div class="list-card w-full bg-[#1a1d24] border border-[#2a2e39] rounded-2xl p-3 md:p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 md:gap-4 overflow-hidden">
+                    <div class="modern-card w-full bg-surface border border-borderLine rounded-[1.25rem] p-3 md:p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 overflow-hidden">
                         
-                        <!-- معلومات الملف (جهة اليمين) -->
-                        <div class="flex items-center gap-3 w-full lg:w-auto flex-1 min-w-0">
+                        <!-- القسم الأيمن: الأيقونة واسم الملف -->
+                        <div class="flex items-center gap-4 w-full lg:w-[35%] min-w-0">
                             ${iconHtml}
-                            <div class="flex flex-col gap-1 min-w-0 flex-1">
-                                <h4 class="font-bold text-textMain text-sm md:text-base truncate w-full" title="${fileNameDisplay}">${fileNameDisplay}</h4>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-medium text-textMuted bg-darkBg px-2 py-0.5 rounded-md border border-darkBorder self-start">${fileSizeDisplay}</span>
-                                    <span class="text-[10px] text-textMuted lg:hidden">${timeStr}</span>
+                            <div class="flex flex-col min-w-0">
+                                <h4 class="font-bold text-textMain text-[15px] truncate w-full" title="${fileNameDisplay}">${fileNameDisplay}</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold text-textMuted bg-background px-2 py-0.5 rounded border border-borderLine">${fileSizeDisplay}</span>
+                                    <span class="text-[10px] text-textMuted/60 lg:hidden">• ${timeStr}</span>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- القسم السفلي في الجوال / الأيسر في الديسكتوب -->
-                        <div class="flex items-center justify-between w-full lg:w-auto gap-3 pt-2 lg:pt-0 border-t lg:border-0 border-darkBorder/50 shrink-0">
+                        <!-- القسم الأيسر: المستخدم، التاريخ، زر التحميل -->
+                        <div class="flex items-center justify-between w-full lg:w-[65%] gap-4 pt-3 lg:pt-0 border-t lg:border-0 border-borderLine shrink-0">
                             
-                            <!-- صورة واسم المستخدم -->
-                            <div class="flex items-center gap-2 md:gap-3 w-1/2 lg:w-auto">
-                                <img src="${otherUser.avatar}" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-darkBorder bg-darkBg shrink-0">
+                            <!-- المستخدم -->
+                            <div class="flex items-center gap-3 w-[45%] lg:w-[35%]">
+                                <img src="${otherUser.avatar}" class="w-9 h-9 rounded-full border border-borderLine bg-background shrink-0">
                                 <div class="flex flex-col min-w-0">
-                                    <p class="text-[9px] md:text-[10px] text-textMuted hidden md:block">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
-                                    <p class="text-xs font-bold text-textMain truncate max-w-[90px] md:max-w-[120px]">${otherUser.name}</p>
+                                    <p class="text-[9px] text-textMuted tracking-wider">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
+                                    <p class="text-xs font-bold text-textMain truncate">${otherUser.name}</p>
                                 </div>
                             </div>
                             
-                            <!-- التاريخ (يظهر في المنتصف في الشاشات الكبيرة) -->
-                            <div class="hidden lg:block w-[120px] text-center shrink-0">
-                                <p class="text-[11px] text-textMuted leading-relaxed">${timeStr.replace(', ', '<br>')}</p>
+                            <!-- التاريخ -->
+                            <div class="hidden lg:flex w-[25%] justify-center">
+                                <p class="text-[11px] text-textMuted font-medium">${timeStr.replace(', ', '<br>')}</p>
                             </div>
                             
-                            <!-- زر التحميل (دائماً مرئي) -->
-                            <div class="shrink-0 flex justify-end w-1/2 lg:w-auto">
+                            <!-- زر التحميل -->
+                            <div class="flex justify-end w-[55%] lg:w-[40%]">
                                 ${actionHtml}
                             </div>
-
                         </div>
                     </div>
                 `;
@@ -674,7 +702,7 @@
             });
         }
 
-        // 6. النافذة المنبثقة لاختيار المستلم
+        // 6. اختيار المستلم
         window.openRecipientModal = () => {
             document.getElementById('recipient-modal').classList.remove('hidden');
             document.getElementById('recipient-modal').classList.add('flex');
@@ -700,7 +728,7 @@
             const filtered = usersData.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
 
             if (filtered.length === 0) {
-                list.innerHTML = `<p class="text-sm text-textMuted text-center py-10 w-full">لا يوجد مستخدم بهذا الاسم</p>`;
+                list.innerHTML = `<p class="text-sm text-textMuted text-center py-6">لا توجد نتائج</p>`;
                 return;
             }
 
@@ -710,12 +738,12 @@
                 const isSelected = currentSelectedId === u.uid;
                 const html = `
                     <div onclick="selectRecipient('${u.uid}', '${u.name}', '${u.avatar}')" 
-                        class="cursor-pointer flex items-center gap-3 p-3 rounded-xl border ${isSelected ? 'border-primary bg-primary/10 shadow-md' : 'border-darkBorder bg-darkBg hover:bg-darkHover hover:border-textMuted/30'} transition-all group shrink-0">
-                        <img src="${u.avatar}" class="w-10 h-10 rounded-full bg-darkBg border-2 ${isSelected ? 'border-primary' : 'border-darkBorder group-hover:border-textMuted/50'} transition-colors">
+                        class="cursor-pointer flex items-center gap-3 p-3 rounded-xl border ${isSelected ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-background'} transition-all shrink-0">
+                        <img src="${u.avatar}" class="w-10 h-10 rounded-full bg-background border border-borderLine">
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-sm font-bold ${isSelected ? 'text-primary' : 'text-textMain'} truncate">${u.name}</h4>
+                            <h4 class="text-sm font-bold text-textMain truncate">${u.name}</h4>
                         </div>
-                        ${isSelected ? `<i class="fa-solid fa-circle-check text-primary text-lg fade-in"></i>` : `<i class="fa-solid fa-chevron-left text-textMuted text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>`}
+                        ${isSelected ? `<i class="fa-solid fa-circle-check text-primary text-lg"></i>` : ``}
                     </div>
                 `;
                 list.insertAdjacentHTML('beforeend', html);
@@ -724,11 +752,10 @@
 
         window.selectRecipient = (uid, name, avatarUrl) => {
             document.getElementById('selected-recipient-id').value = uid;
-            const btnText = document.getElementById('recipient-btn-text');
-            btnText.innerHTML = `
+            document.getElementById('recipient-btn-text').innerHTML = `
                 <div class="flex items-center gap-2">
-                    <img src="${avatarUrl}" class="w-6 h-6 rounded-full border border-darkBorder">
-                    <span class="truncate max-w-[100px] text-sm">${name}</span>
+                    <img src="${avatarUrl}" class="w-6 h-6 rounded-full border border-borderLine">
+                    <span class="truncate max-w-[120px] text-sm text-textMain font-bold">${name}</span>
                 </div>
             `;
             closeRecipientModal();
@@ -737,56 +764,53 @@
 
         window.selectRecipientAndGo = (uid, name, avatarUrl) => {
             selectRecipient(uid, name, avatarUrl);
-            navigate('send', 2);
+            navigate('send');
         };
 
-        // 7. معالجة الملفات والرفع
+        // 7. الرفع المسرع
         window.handleFileSelection = (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             const maxSize = 100 * 1024 * 1024;
             if (file.size > maxSize) {
-                alert("الحد الأقصى للملف هو 100 ميجابايت.");
+                alert("الحد الأقصى للملف 100 ميجابايت.");
                 e.target.value = '';
                 return;
             }
 
             selectedFile = file;
             let sizeStr = file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-
             const isImage = file.type.startsWith('image/');
-            const iconHtml = isImage ? `<i class="fa-solid fa-image text-blue-400"></i>` : `<i class="fa-solid fa-file-lines text-emerald-400"></i>`;
+            const iconHtml = isImage ? `<i class="fa-solid fa-image text-primary"></i>` : `<i class="fa-solid fa-file-lines text-primary"></i>`;
 
             document.getElementById('file-preview-area').innerHTML = `
-                <div class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-darkBorder shadow-md relative group-hover:-translate-y-1 transition-transform">
+                <div class="w-16 h-16 rounded-[1rem] bg-primary/10 flex items-center justify-center text-3xl mb-4 relative border border-primary/20">
                     ${iconHtml}
-                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-darkSurface flex items-center justify-center text-white text-[10px]">
+                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full border-2 border-surface flex items-center justify-center text-white text-[10px]">
                         <i class="fa-solid fa-check"></i>
                     </div>
                 </div>
-                <p class="text-textMain font-bold mb-1 truncate px-4 w-full max-w-[250px] text-center text-sm md:text-base" dir="ltr">${file.name}</p>
-                <p class="text-textMuted text-xs text-center font-bold mb-4 bg-darkBg px-2 py-1 rounded border border-darkBorder">${sizeStr}</p>
+                <h3 class="text-textMain font-bold text-sm mb-1 truncate w-full max-w-[200px]" dir="ltr">${file.name}</h3>
+                <span class="text-textMuted text-xs mb-4">${sizeStr}</span>
                 
-                <button id="btn-delete-file" onclick="clearFileSelection(event)" class="text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-2.5 px-6 rounded-xl transition-colors shrink-0 flex items-center justify-center gap-2 mx-auto border border-rose-500/20 z-20 relative">
-                    <i class="fa-solid fa-trash"></i> إزالة الملف
+                <button id="btn-delete-file" onclick="clearFileSelection(event)" class="text-xs font-bold bg-background hover:bg-borderLine text-rose-400 py-2 px-5 rounded-lg transition-colors border border-borderLine">
+                    إزالة الملف
                 </button>
             `;
             checkSendReady();
         };
 
         window.clearFileSelection = (e) => {
-            if (e && e.stopPropagation) e.stopPropagation();
+            if (e) e.stopPropagation();
             selectedFile = null;
             document.getElementById('file-upload-input').value = '';
             document.getElementById('file-preview-area').innerHTML = `
-                <div class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-4 border-2 border-darkBg shadow-lg relative group-hover:-translate-y-1 transition-transform">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                <div class="w-20 h-20 rounded-[1rem] bg-surface border border-borderLine flex items-center justify-center text-3xl text-primary mb-4 group-hover:scale-110 transition-transform shadow-sm transform -rotate-3">
+                    <i class="fa-solid fa-cloud-upload-alt"></i>
                 </div>
-                <p class="text-textMain font-bold text-lg mb-1">اضغط هنا أو اسحب الملف</p>
-                <div class="flex items-center gap-2 text-textMuted text-sm mt-2">
-                    <span class="bg-darkSurface px-3 py-1 rounded-md border border-darkBorder text-emerald-400/80">الحد الأقصى 100MB</span>
-                </div>
+                <h3 class="text-textMain font-bold text-base mb-1">انقر أو اسحب الملف هنا</h3>
+                <span class="text-textMuted text-xs bg-surface px-3 py-1 rounded-lg border border-borderLine mt-2">الحد الأقصى 100 ميجابايت</span>
             `;
             checkSendReady();
         };
@@ -816,7 +840,6 @@
             };
         }
 
-        // تسريع رفع الملفات عبر الرفع المتزامن (Concurrent Batching)
         window.submitTransfer = async () => {
             const recipientId = document.getElementById('selected-recipient-id').value;
             if (!recipientId || !selectedFile || !myUser) return;
@@ -825,7 +848,6 @@
             const btnIcon = document.getElementById('btn-submit-icon');
             const btnText = document.getElementById('btn-submit-text');
             const progressBar = document.getElementById('upload-progress-bar');
-
             const deleteBtn = document.getElementById('btn-delete-file');
             const dropzone = document.getElementById('dropzone');
             const chooseUserBtn = document.getElementById('btn-open-recipient-modal');
@@ -836,8 +858,8 @@
             chooseUserBtn.classList.add('opacity-50');
 
             btn.setAttribute('disabled', 'true');
-            btnIcon.className = 'fa-solid fa-spinner fa-spin';
-            btnText.innerText = 'جاري التجهيز...';
+            btnIcon.className = 'fa-solid fa-circle-notch fa-spin';
+            btnText.innerText = 'تجهيز...';
             progressBar.style.width = '2%';
 
             const file = selectedFile;
@@ -847,14 +869,14 @@
             reader.onload = async function (e) {
                 try {
                     if (isImage) {
-                        btnText.innerText = 'جاري ضغط ورفع الصورة...';
+                        btnText.innerText = 'معالجة...';
                         let simProgress = 10;
                         const simInterval = setInterval(() => {
-                            simProgress += 10;
+                            simProgress += 15;
                             if (simProgress > 90) clearInterval(simInterval);
                             progressBar.style.width = simProgress + '%';
                             btnText.innerText = `${simProgress}%`;
-                        }, 150);
+                        }, 100);
 
                         compressImage(e.target.result, async (compressedBase64) => {
                             await addDoc(collection(db, MESSAGES_PATH), {
@@ -863,9 +885,9 @@
                             });
                             clearInterval(simInterval);
                             progressBar.style.width = '100%';
-                            btnText.innerText = 'اكتمل بنجاح!';
+                            btnText.innerText = 'اكتمل!';
                             btnIcon.className = 'fa-solid fa-check';
-                            setTimeout(finishTransfer, 800);
+                            setTimeout(finishTransfer, 700);
                         });
                     } else {
                         const base64File = e.target.result;
@@ -876,10 +898,10 @@
                             type: 'file_chunked', fileName: file.name, fileSize: sizeStr, timestamp: serverTimestamp()
                         });
 
-                        const chunkSize = 800000; // حجم الدفعة
+                        const chunkSize = 800000;
                         const totalChunks = Math.ceil(base64File.length / chunkSize);
                         let chunksUploaded = 0;
-                        const concurrencyLimit = 5; // رفع 5 أجزاء في نفس الوقت لتسريع العملية
+                        const concurrencyLimit = 5;
 
                         for (let i = 0; i < totalChunks; i += concurrencyLimit) {
                             const batch = [];
@@ -888,22 +910,22 @@
                                 const uploadPromise = setDoc(doc(db, MESSAGES_PATH, msgRef.id, 'chunks', String(j)), { data: chunkData })
                                     .then(() => {
                                         chunksUploaded++;
-                                        const currentPercentage = Math.round((chunksUploaded / totalChunks) * 100);
-                                        progressBar.style.width = currentPercentage + '%';
-                                        btnText.innerText = `جاري الرفع... ${currentPercentage}%`;
+                                        const percentage = Math.round((chunksUploaded / totalChunks) * 100);
+                                        progressBar.style.width = percentage + '%';
+                                        btnText.innerText = `${percentage}%`;
                                     });
                                 batch.push(uploadPromise);
                             }
-                            await Promise.all(batch); // انتظار اكتمال الـ 5 دفعات
+                            await Promise.all(batch);
                         }
 
                         progressBar.style.width = '100%';
-                        btnText.innerText = 'اكتمل بنجاح!';
+                        btnText.innerText = 'تم الإرسال!';
                         btnIcon.className = 'fa-solid fa-check';
-                        setTimeout(finishTransfer, 800);
+                        setTimeout(finishTransfer, 700);
                     }
                 } catch (err) {
-                    alert("حدث خطأ أثناء الرفع. تحقق من اتصالك.");
+                    alert("حدث خطأ في الشبكة، حاول مرة أخرى.");
                     resetSendUI();
                 }
             };
@@ -918,36 +940,36 @@
             const dropzone = document.getElementById('dropzone');
             const chooseUserBtn = document.getElementById('btn-open-recipient-modal');
 
-            if (deleteBtn) deleteBtn.style.display = 'flex';
+            if (deleteBtn) deleteBtn.style.display = 'inline-block';
             dropzone.style.pointerEvents = 'auto';
             chooseUserBtn.style.pointerEvents = 'auto';
             chooseUserBtn.classList.remove('opacity-50');
 
             progressBar.style.width = '0%';
             btnIcon.className = 'fa-solid fa-paper-plane';
-            btnText.innerText = 'إرسال الملف الآن';
+            btnText.innerText = 'إرسال الآن';
             checkSendReady();
         }
 
         function finishTransfer() {
             document.getElementById('selected-recipient-id').value = '';
-            document.getElementById('recipient-btn-text').innerText = 'اختيار المستلم';
+            document.getElementById('recipient-btn-text').innerHTML = 'تحديد المستلم';
             window.clearFileSelection();
             resetSendUI();
-            navigate('outbox', 1);
+            navigate('outbox');
         }
 
         window.downloadChunkedFile = async (msgId, fileName) => {
             const btn = document.getElementById(`dl-btn-${msgId}`);
             const originalHtml = btn.innerHTML;
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحميل...';
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري...';
 
             try {
                 const chunksRef = collection(db, MESSAGES_PATH, msgId, 'chunks');
                 const snap = await getDocs(chunksRef);
 
                 if (snap.empty) {
-                    alert('الملف غير مكتمل أو تالف.');
+                    alert('عذراً، الملف تالف أو محذوف.');
                     if (btn) btn.innerHTML = originalHtml;
                     return;
                 }
@@ -977,24 +999,24 @@
             const filtered = usersData.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
 
             if (filtered.length === 0) {
-                container.innerHTML = `<p class="text-center text-textMuted py-10 w-full">لا توجد جهات اتصال.</p>`;
+                container.innerHTML = `<p class="text-center text-textMuted py-10 w-full col-span-full">لا يوجد بيانات.</p>`;
                 return;
             }
 
             filtered.forEach(u => {
                 const html = `
-                    <div class="list-card w-full bg-[#1a1d24] border border-[#2a2e39] rounded-2xl p-3 md:p-4 flex flex-row items-center justify-between gap-3 md:gap-4 overflow-hidden">
-                        <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                            <img src="${u.avatar}" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-darkBorder bg-darkBg shrink-0">
+                    <div class="w-full bg-surface border border-borderLine rounded-2xl p-4 flex flex-row items-center justify-between gap-3 modern-card">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <img src="${u.avatar}" class="w-12 h-12 rounded-full border border-borderLine bg-background shrink-0">
                             <div class="min-w-0">
-                                <h3 class="font-bold text-textMain text-sm md:text-base truncate">${u.name}</h3>
-                                <p class="text-[10px] md:text-xs text-textMuted mt-0.5">مستخدم فلو</p>
+                                <h3 class="font-bold text-textMain text-sm truncate">${u.name}</h3>
+                                <p class="text-[10px] text-textMuted mt-0.5">مستخدم المنصة</p>
                             </div>
                         </div>
 
                         <button onclick="selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
-                            class="shrink-0 bg-darkBg border border-darkBorder hover:bg-primary/20 hover:text-primary hover:border-primary text-textMuted text-xs md:text-sm font-bold py-2 md:py-2.5 px-4 md:px-6 rounded-xl transition-all whitespace-nowrap flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-paper-plane text-xs"></i> <span class="hidden sm:inline">إرسال</span>
+                            class="shrink-0 bg-background border border-borderLine hover:border-primary text-textMain text-xs font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-[10px] text-primary"></i> إرسال
                         </button>
                     </div>
                 `;

@@ -8,7 +8,7 @@
     <title>تطبيق فلو | نقل الملفات</title>
 
     <!-- App Web App Meta Tags -->
-    <meta name="theme-color" content="#0f1115">
+    <meta name="theme-color" content="#111318">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -111,9 +111,14 @@
             background-color: rgba(99, 102, 241, 0.05);
         }
 
-        /* تخصيص شريط التمرير للنافذة المنبثقة */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
+        /* تخصيص إخفاء شريط التمرير للبطاقات الأفقية */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
@@ -134,7 +139,7 @@
         <p class="text-textMuted text-sm mt-2">جاري مزامنة المنصة...</p>
     </div>
 
-    <!-- نافذة إعداد الملف الشخصي -->
+    <!-- نافذة إعداد الملف الشخصي (إلزامية) -->
     <div id="setup-modal"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] hidden flex flex-col items-center justify-center p-4 transition-all">
         <div class="bg-darkSurface rounded-3xl p-8 max-w-sm w-full border border-darkBorder shadow-2xl fade-in">
@@ -144,7 +149,7 @@
                     <i class="fa-solid fa-folder-open"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-textMain">منصة فلو</h2>
-                <p class="text-textMuted text-sm mt-2">أدخل اسمك للبدء في إرسال واستقبال الملفات</p>
+                <p class="text-textMuted text-sm mt-2">يجب تسجيل الدخول للإستمرار</p>
             </div>
             <div class="relative mb-4">
                 <i class="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
@@ -164,7 +169,7 @@
         </div>
     </div>
 
-    <!-- نافذة اختيار المستلم (الجديدة) -->
+    <!-- نافذة اختيار المستلم -->
     <div id="recipient-modal"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex flex-col items-center justify-center p-4 transition-all">
         <div
@@ -184,7 +189,7 @@
                     oninput="filterRecipientModalList()"
                     class="w-full bg-darkBg border border-darkBorder rounded-xl pr-10 pl-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-textMain transition-all shadow-inner text-sm">
             </div>
-            <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 custom-scrollbar">
+            <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 hide-scrollbar">
                 <!-- يتم التوليد برمجياً -->
             </div>
         </div>
@@ -193,18 +198,26 @@
     <!-- الهيكل الرئيسي -->
     <div class="w-full h-full flex flex-col overflow-hidden relative">
 
-        <!-- شريط التنقل العلوي المطور -->
+        <!-- شريط التنقل العلوي -->
         <header class="w-full flex flex-col z-20 bg-darkBg border-b border-darkBorder shadow-md shrink-0">
 
-            <!-- الصف الأول: شعار فلو ممتد من اليمين لليسار -->
-            <div class="w-full px-4 md:px-8 py-3 bg-[#111318] border-b border-darkBorder/50 flex items-center">
-                <div class="flex items-center gap-3 w-full max-w-6xl mx-auto">
+            <!-- الصف الأول: الشعار (مع هوامش أكبر للجوال لتفادي البطارية/الشبكة) + زر تسجيل الخروج -->
+            <div
+                class="w-full px-4 md:px-8 pt-12 pb-3 md:pt-4 md:pb-4 bg-[#111318] border-b border-darkBorder/50 flex items-center">
+                <div class="flex items-center gap-3 w-full max-w-6xl mx-auto relative">
                     <i class="fa-solid fa-folder-open text-primary text-xl md:text-2xl"></i>
                     <span class="text-primary font-black text-xl md:text-2xl tracking-widest">فلو</span>
                     <!-- الخط الممتد إلى اليسار -->
                     <div
                         class="h-[2px] bg-gradient-to-l from-primary/50 via-primary/10 to-transparent flex-1 ml-4 rounded-full">
                     </div>
+
+                    <!-- زر تسجيل الخروج -->
+                    <button onclick="logoutUser()"
+                        class="w-9 h-9 flex items-center justify-center rounded-full bg-darkSurface border border-darkBorder hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-500 transition-all absolute left-0 shrink-0 text-textMuted shadow-sm"
+                        title="تسجيل الخروج">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
                 </div>
             </div>
 
@@ -212,9 +225,9 @@
             <div class="w-full px-4 md:px-8 py-4 flex justify-center">
                 <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
 
-                    <!-- زر البروفايل (جهة اليمين) -->
+                    <!-- زر البروفايل -->
                     <div
-                        class="flex items-center gap-3 shrink-0 bg-darkSurface border border-darkBorder rounded-full py-1.5 pr-1.5 pl-5 cursor-pointer hover:border-primary/40 transition-all shadow-sm w-full lg:w-auto justify-between lg:justify-start">
+                        class="flex items-center gap-3 shrink-0 bg-darkSurface border border-darkBorder rounded-full py-1.5 pr-1.5 pl-5 hover:border-primary/40 transition-all shadow-sm w-full lg:w-auto justify-between lg:justify-start">
                         <div class="flex items-center gap-3">
                             <div class="relative">
                                 <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
@@ -231,7 +244,7 @@
                         </div>
                     </div>
 
-                    <!-- شريط الأقسام (الكبسولة) بجانب البروفايل -->
+                    <!-- شريط الأقسام (الكبسولة) -->
                     <div
                         class="bg-[#15181e] p-1.5 rounded-[2rem] flex flex-1 w-full border border-darkBorder relative text-xs md:text-sm font-bold shadow-inner overflow-x-auto hide-scrollbar">
                         <div id="nav-indicator"
@@ -276,7 +289,6 @@
                                 class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
                                 ملفات</span>
                         </div>
-                        <!-- مستطيلات أفقية -->
                         <div id="inbox-grid" class="flex flex-col gap-3 pb-10 w-full">
                             <!-- ملفات الوارد -->
                         </div>
@@ -293,7 +305,6 @@
                                 class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
                                 ملفات</span>
                         </div>
-                        <!-- مستطيلات أفقية -->
                         <div id="outbox-grid" class="flex flex-col gap-3 pb-10 w-full">
                             <!-- ملفات الصادر -->
                         </div>
@@ -382,7 +393,6 @@
                                     class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-xs"></i>
                             </div>
                         </div>
-                        <!-- مستطيلات أفقية -->
                         <div id="contacts-page-grid" class="flex flex-col gap-3 pb-10 w-full">
                             <!-- جهات الاتصال -->
                         </div>
@@ -396,7 +406,7 @@
     <!-- Firebase و JavaScript -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -422,7 +432,7 @@
         const USERS_PATH = 'users';
         const MESSAGES_PATH = 'messages';
 
-        // 1. التهيئة مع التخطي للأخطاء
+        // 1. التهيئة 
         onAuthStateChanged(auth, async (user) => {
             const loading = document.getElementById('loading-screen');
             const setupModal = document.getElementById('setup-modal');
@@ -447,18 +457,23 @@
                     loading.innerHTML = `
                         <div class="relative w-20 h-20 mb-6 flex items-center justify-center mx-auto">
                             <i class="fa-solid fa-wifi text-5xl text-rose-500 opacity-80"></i>
-                            <div class="absolute w-16 h-1.5 bg-rose-500 transform -rotate-45 rounded-full shadow-md"></div>
                         </div>
                         <h1 class="text-2xl font-bold tracking-wider text-rose-400">تعذر الاتصال بالخادم</h1>
-                        <p class="text-textMuted text-sm mt-3 max-w-xs text-center leading-relaxed mx-auto">لم يتمكن التطبيق من جلب البيانات. يرجى التحقق من اتصالك بالإنترنت وإعادة المحاولة.</p>
                         <button onclick="window.location.reload()" class="mt-8 px-8 py-3 bg-darkSurface border border-darkBorder hover:border-rose-500/50 hover:text-rose-400 text-textMain font-bold rounded-xl transition-colors shadow-lg">إعادة تحميل الصفحة</button>
                     `;
                 }
             } else {
                 loading.classList.add('opacity-0', 'pointer-events-none');
-                setupModal.classList.remove('hidden');
+                setupModal.classList.remove('hidden'); // إلزامي تسجيل الدخول
             }
         });
+
+        // تسجيل الخروج
+        window.logoutUser = () => {
+            signOut(auth).catch((error) => {
+                alert("حدث خطأ أثناء تسجيل الخروج");
+            });
+        };
 
         // 2. إعداد الحساب
         window.saveUserProfile = async () => {
@@ -504,7 +519,7 @@
             document.getElementById('my-name-display').textContent = myUser.name;
         }
 
-        // 3. التنقل (إصلاح مشكلة الـ Layout)
+        // 3. التنقل
         window.navigate = (pageId, index) => {
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-white');
@@ -521,13 +536,11 @@
                 indicator.style.right = `calc(${index * 25}% + 1.5px)`;
             }
 
-            // إخفاء كل الصفحات عن طريق إضافة hidden فقط (بدون التلاعب بـ flex)
             document.querySelectorAll('.app-page').forEach(page => {
                 page.classList.add('hidden');
                 page.classList.remove('block');
             });
 
-            // إظهار الصفحة المستهدفة باستخدام block، لأن بداخلها div يعمل كـ flex-col
             const targetPage = document.getElementById(`page-${pageId}`);
             targetPage.classList.remove('hidden');
             targetPage.classList.add('block');
@@ -570,7 +583,7 @@
             });
         }
 
-        // 5. عرض الملفات (مستطيلات أفقية سليمة 100%)
+        // 5. عرض الملفات (بالتصميم الأفقي المطابق للصورة للجوال والديسكتوب)
         function renderFilesGrid() {
             const isInbox = currentPage === 'inbox';
             const gridId = isInbox ? 'inbox-grid' : 'outbox-grid';
@@ -609,48 +622,52 @@
                 let actionHtml = '';
 
                 if (file.type === 'image') {
-                    iconHtml = `<div class="w-12 h-12 md:w-14 md:h-14 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
-                    actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="bg-darkHover hover:bg-darkBorder border border-darkBorder text-textMain text-sm font-bold py-2.5 px-4 md:px-6 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> <span class="hidden sm:inline">تحميل</span></a>`;
+                    iconHtml = `<div class="w-10 h-10 md:w-12 md:h-12 bg-[#1a2332] text-blue-400 rounded-xl flex items-center justify-center text-lg md:text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
+                    actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs md:text-sm font-bold py-2 px-4 md:py-2.5 md:px-6 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> تحميل</a>`;
                 } else if (file.type === 'file_chunked') {
-                    const isPdf = fileNameDisplay.toLowerCase().endsWith('.pdf');
-                    const isWord = fileNameDisplay.toLowerCase().endsWith('.doc') || fileNameDisplay.toLowerCase().endsWith('.docx');
-                    const colorClass = isPdf ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : (isWord ? 'text-blue-400 bg-blue-500/10 border-blue-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20');
-                    const iconClass = isPdf ? 'fa-file-pdf' : (isWord ? 'fa-file-word' : 'fa-file-lines');
-
-                    iconHtml = `<div class="w-12 h-12 md:w-14 md:h-14 ${colorClass} border rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${iconClass}"></i></div>`;
-                    actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="bg-primary/10 hover:bg-primary border border-primary/20 hover:border-primary hover:text-white text-primary text-sm font-bold py-2.5 px-4 md:px-6 rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> <span class="hidden sm:inline">تحميل</span></button>`;
+                    iconHtml = `<div class="w-10 h-10 md:w-12 md:h-12 bg-[#172621] text-[#22c55e] rounded-xl flex items-center justify-center text-lg md:text-xl shrink-0"><i class="fa-solid fa-file-lines"></i></div>`;
+                    actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs md:text-sm font-bold py-2 px-4 md:py-2.5 md:px-6 rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> تحميل</button>`;
                 }
 
-                // الكارت بعرض الشاشة بالكامل وبشكل مرتب
+                // تصميم متجاوب (Responsive) يطوى بذكاء في الجوال ويظهر كخط واحد في الديسكتوب
                 const cardHtml = `
-                    <div class="list-card w-full bg-darkSurface border border-darkBorder rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden">
+                    <div class="list-card w-full bg-[#1a1d24] border border-[#2a2e39] rounded-2xl p-3 md:p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 md:gap-4 overflow-hidden">
                         
-                        <div class="flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
+                        <!-- معلومات الملف (جهة اليمين) -->
+                        <div class="flex items-center gap-3 w-full lg:w-auto flex-1 min-w-0">
                             ${iconHtml}
-                            <div class="min-w-0 flex-1">
-                                <h4 class="font-bold text-textMain text-sm md:text-base truncate" title="${fileNameDisplay}">${fileNameDisplay}</h4>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs text-textMuted bg-darkBg px-2 py-0.5 rounded border border-darkBorder">${fileSizeDisplay}</span>
-                                    <span class="text-[10px] text-textMuted sm:hidden">${timeStr}</span>
+                            <div class="flex flex-col gap-1 min-w-0 flex-1">
+                                <h4 class="font-bold text-textMain text-sm md:text-base truncate w-full" title="${fileNameDisplay}">${fileNameDisplay}</h4>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-medium text-textMuted bg-darkBg px-2 py-0.5 rounded-md border border-darkBorder self-start">${fileSizeDisplay}</span>
+                                    <span class="text-[10px] text-textMuted lg:hidden">${timeStr}</span>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="flex flex-col sm:flex-row items-end sm:items-center justify-between sm:justify-end gap-4 w-full sm:w-auto shrink-0 border-t sm:border-t-0 border-darkBorder/50 pt-3 sm:pt-0">
-                            <div class="flex items-center gap-3">
-                                <div class="text-left hidden sm:block">
-                                    <p class="text-[10px] text-textMuted">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
-                                    <p class="text-xs font-bold text-textMain truncate w-24">${otherUser.name}</p>
+                        <!-- القسم السفلي في الجوال / الأيسر في الديسكتوب -->
+                        <div class="flex items-center justify-between w-full lg:w-auto gap-3 pt-2 lg:pt-0 border-t lg:border-0 border-darkBorder/50 shrink-0">
+                            
+                            <!-- صورة واسم المستخدم -->
+                            <div class="flex items-center gap-2 md:gap-3 w-1/2 lg:w-auto">
+                                <img src="${otherUser.avatar}" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-darkBorder bg-darkBg shrink-0">
+                                <div class="flex flex-col min-w-0">
+                                    <p class="text-[9px] md:text-[10px] text-textMuted hidden md:block">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
+                                    <p class="text-xs font-bold text-textMain truncate max-w-[90px] md:max-w-[120px]">${otherUser.name}</p>
                                 </div>
-                                <img src="${otherUser.avatar}" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-darkBorder bg-darkBg" title="${otherUser.name}">
                             </div>
                             
-                            <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                <span class="text-xs text-textMuted hidden md:block w-24 text-center">${timeStr}</span>
+                            <!-- التاريخ (يظهر في المنتصف في الشاشات الكبيرة) -->
+                            <div class="hidden lg:block w-[120px] text-center shrink-0">
+                                <p class="text-[11px] text-textMuted leading-relaxed">${timeStr.replace(', ', '<br>')}</p>
+                            </div>
+                            
+                            <!-- زر التحميل (دائماً مرئي) -->
+                            <div class="shrink-0 flex justify-end w-1/2 lg:w-auto">
                                 ${actionHtml}
                             </div>
-                        </div>
 
+                        </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
@@ -799,6 +816,7 @@
             };
         }
 
+        // تسريع رفع الملفات عبر الرفع المتزامن (Concurrent Batching)
         window.submitTransfer = async () => {
             const recipientId = document.getElementById('selected-recipient-id').value;
             if (!recipientId || !selectedFile || !myUser) return;
@@ -858,16 +876,25 @@
                             type: 'file_chunked', fileName: file.name, fileSize: sizeStr, timestamp: serverTimestamp()
                         });
 
-                        const chunkSize = 800000;
+                        const chunkSize = 800000; // حجم الدفعة
                         const totalChunks = Math.ceil(base64File.length / chunkSize);
+                        let chunksUploaded = 0;
+                        const concurrencyLimit = 5; // رفع 5 أجزاء في نفس الوقت لتسريع العملية
 
-                        for (let i = 0; i < totalChunks; i++) {
-                            const chunkData = base64File.substring(i * chunkSize, (i + 1) * chunkSize);
-                            await setDoc(doc(db, MESSAGES_PATH, msgRef.id, 'chunks', String(i)), { data: chunkData });
-
-                            const currentPercentage = Math.round(((i + 1) / totalChunks) * 100);
-                            progressBar.style.width = currentPercentage + '%';
-                            btnText.innerText = `جاري الرفع... ${currentPercentage}%`;
+                        for (let i = 0; i < totalChunks; i += concurrencyLimit) {
+                            const batch = [];
+                            for (let j = i; j < i + concurrencyLimit && j < totalChunks; j++) {
+                                const chunkData = base64File.substring(j * chunkSize, (j + 1) * chunkSize);
+                                const uploadPromise = setDoc(doc(db, MESSAGES_PATH, msgRef.id, 'chunks', String(j)), { data: chunkData })
+                                    .then(() => {
+                                        chunksUploaded++;
+                                        const currentPercentage = Math.round((chunksUploaded / totalChunks) * 100);
+                                        progressBar.style.width = currentPercentage + '%';
+                                        btnText.innerText = `جاري الرفع... ${currentPercentage}%`;
+                                    });
+                                batch.push(uploadPromise);
+                            }
+                            await Promise.all(batch); // انتظار اكتمال الـ 5 دفعات
                         }
 
                         progressBar.style.width = '100%';
@@ -913,7 +940,7 @@
         window.downloadChunkedFile = async (msgId, fileName) => {
             const btn = document.getElementById(`dl-btn-${msgId}`);
             const originalHtml = btn.innerHTML;
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span class="hidden sm:inline">جاري التحميل...</span>';
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحميل...';
 
             try {
                 const chunksRef = collection(db, MESSAGES_PATH, msgId, 'chunks');
@@ -956,19 +983,18 @@
 
             filtered.forEach(u => {
                 const html = `
-                    <div class="list-card w-full bg-darkSurface border border-darkBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        
-                        <div class="flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
-                            <img src="${u.avatar}" class="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-darkBorder bg-darkBg shrink-0">
+                    <div class="list-card w-full bg-[#1a1d24] border border-[#2a2e39] rounded-2xl p-3 md:p-4 flex flex-row items-center justify-between gap-3 md:gap-4 overflow-hidden">
+                        <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                            <img src="${u.avatar}" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-darkBorder bg-darkBg shrink-0">
                             <div class="min-w-0">
-                                <h3 class="font-bold text-textMain text-base truncate">${u.name}</h3>
-                                <p class="text-xs text-textMuted mt-0.5">مستخدم فلو</p>
+                                <h3 class="font-bold text-textMain text-sm md:text-base truncate">${u.name}</h3>
+                                <p class="text-[10px] md:text-xs text-textMuted mt-0.5">مستخدم فلو</p>
                             </div>
                         </div>
 
                         <button onclick="selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
-                            class="w-full sm:w-auto bg-darkBg border border-darkBorder hover:bg-primary/20 hover:text-primary hover:border-primary text-textMuted text-sm font-bold py-2.5 px-8 rounded-xl transition-all whitespace-nowrap flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-paper-plane text-xs"></i> إرسال ملف
+                            class="shrink-0 bg-darkBg border border-darkBorder hover:bg-primary/20 hover:text-primary hover:border-primary text-textMuted text-xs md:text-sm font-bold py-2 md:py-2.5 px-4 md:px-6 rounded-xl transition-all whitespace-nowrap flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-xs"></i> <span class="hidden sm:inline">إرسال</span>
                         </button>
                     </div>
                 `;
@@ -976,7 +1002,6 @@
             });
         };
 
-        // أحداث السحب والإفلات
         const dropzone = document.getElementById('dropzone');
         if (dropzone) {
             dropzone.addEventListener('dragover', (e) => {

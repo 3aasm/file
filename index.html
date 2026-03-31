@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title> فلو نقل الملفات</title>
+    <title>تطبيق فلو | نقل الملفات</title>
 
     <!-- App Web App Meta Tags -->
     <meta name="theme-color" content="#0f1115">
@@ -89,13 +89,13 @@
             }
         }
 
-        .file-card {
+        .list-card {
             transition: all 0.2s;
         }
 
-        .file-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        .list-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
             border-color: #374151;
         }
 
@@ -111,23 +111,15 @@
             background-color: rgba(99, 102, 241, 0.05);
         }
 
-        /* إخفاء القائمة في الجوال */
-        @media (max-width: 768px) {
-            #sidebar {
-                position: fixed;
-                z-index: 50;
-                transform: translateX(100%);
-                transition: transform 0.3s ease-in-out;
-            }
-
-            #sidebar.open {
-                transform: translateX(0);
-            }
+        /* تخصيص شريط التمرير للنافذة المنبثقة */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
         }
     </style>
 </head>
 
-<body class="font-sans h-screen flex overflow-hidden selection:bg-primary selection:text-white text-textMain bg-darkBg">
+<body
+    class="font-sans h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white text-textMain bg-darkBg">
 
     <!-- شاشة التحميل -->
     <div id="loading-screen"
@@ -172,222 +164,228 @@
         </div>
     </div>
 
-    <!-- نافذة جاري الإرسال (Overlay) -->
-    <div id="upload-overlay"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-4 transition-all">
-        <div class="bg-darkSurface rounded-2xl p-8 max-w-sm w-full border border-darkBorder text-center fade-in">
-            <div class="text-primary text-5xl mb-4 animate-bounce">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
+    <!-- نافذة اختيار المستلم (الجديدة) -->
+    <div id="recipient-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex flex-col items-center justify-center p-4 transition-all">
+        <div
+            class="bg-darkSurface rounded-3xl p-6 max-w-md w-full border border-darkBorder shadow-2xl fade-in flex flex-col h-[70vh] max-h-[600px]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-textMain">اختيار المستلم</h3>
+                <button onclick="closeRecipientModal()"
+                    class="w-8 h-8 flex items-center justify-center rounded-full bg-darkBg hover:bg-rose-500/20 text-textMuted hover:text-rose-400 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <h3 class="text-lg font-bold text-textMain mb-2">جاري إرسال الملف...</h3>
-            <p class="text-textMuted text-sm" id="upload-status-text">يرجى الانتظار حتى تكتمل العملية.</p>
+            <div class="relative mb-4 shrink-0">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-textMuted">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+                <input type="text" id="recipient-search" placeholder="ابحث عن مستخدم بالاسم..."
+                    oninput="filterRecipientModalList()"
+                    class="w-full bg-darkBg border border-darkBorder rounded-xl pr-10 pl-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-textMain transition-all shadow-inner text-sm">
+            </div>
+            <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 custom-scrollbar">
+                <!-- يتم التوليد برمجياً -->
+            </div>
         </div>
     </div>
 
     <!-- الهيكل الرئيسي -->
-    <div class="w-full h-full flex overflow-hidden relative">
+    <div class="w-full h-full flex flex-col overflow-hidden relative">
 
-        <!-- القائمة الجانبية (Navigation) -->
-        <aside id="sidebar"
-            class="w-64 h-full flex-shrink-0 flex flex-col border-l border-darkBorder bg-darkSurface z-20 shadow-2xl md:shadow-none">
+        <!-- شريط التنقل العلوي المطور -->
+        <header class="w-full flex flex-col z-20 bg-darkBg border-b border-darkBorder shadow-md shrink-0">
 
-            <header
-                class="p-5 border-b border-darkBorder flex flex-col items-center justify-center bg-darkSurface relative">
-                <button onclick="toggleSidebar()"
-                    class="md:hidden absolute top-4 left-4 text-textMuted hover:text-white">
-                    <i class="fa-solid fa-times text-xl"></i>
-                </button>
-                <div class="relative mb-3 mt-2">
-                    <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
-                        class="w-20 h-20 rounded-full object-cover border-4 border-darkBorder bg-darkBg shadow-lg">
+            <!-- الصف الأول: شعار فلو ممتد من اليمين لليسار -->
+            <div class="w-full px-4 md:px-8 py-3 bg-[#111318] border-b border-darkBorder/50 flex items-center">
+                <div class="flex items-center gap-3 w-full max-w-6xl mx-auto">
+                    <i class="fa-solid fa-folder-open text-primary text-xl md:text-2xl"></i>
+                    <span class="text-primary font-black text-xl md:text-2xl tracking-widest">فلو</span>
+                    <!-- الخط الممتد إلى اليسار -->
                     <div
-                        class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-darkSurface rounded-full">
+                        class="h-[2px] bg-gradient-to-l from-primary/50 via-primary/10 to-transparent flex-1 ml-4 rounded-full">
                     </div>
                 </div>
-                <h1 id="my-name-display" class="text-lg font-bold text-textMain truncate w-full text-center">جاري
-                    التحميل...</h1>
-                <p class="text-xs text-textMuted mt-1">حساب نشط</p>
-            </header>
+            </div>
 
-            <nav class="flex-1 overflow-y-auto p-4 space-y-2">
-                <button onclick="navigate('inbox')" id="nav-inbox"
-                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-textMain hover:bg-darkHover transition-colors bg-primary/10 text-primary">
-                    <i class="fa-solid fa-inbox w-5 text-center"></i> صندوق الوارد
-                </button>
-                <button onclick="navigate('outbox')" id="nav-outbox"
-                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-textMuted hover:bg-darkHover transition-colors">
-                    <i class="fa-solid fa-paper-plane w-5 text-center"></i> صندوق الصادر
-                </button>
-                <button onclick="navigate('send')" id="nav-send"
-                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-textMuted hover:bg-darkHover transition-colors">
-                    <i class="fa-solid fa-file-export w-5 text-center"></i> إرسال ملف جديد
-                </button>
-                <div class="my-4 border-t border-darkBorder"></div>
-                <button onclick="navigate('contacts')" id="nav-contacts"
-                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-textMuted hover:bg-darkHover transition-colors">
-                    <i class="fa-solid fa-users w-5 text-center"></i> دليل المستخدمين
-                </button>
-            </nav>
-        </aside>
+            <!-- الصف الثاني: البروفايل يمين + شريط الأقسام يسار/وسط -->
+            <div class="w-full px-4 md:px-8 py-4 flex justify-center">
+                <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
+
+                    <!-- زر البروفايل (جهة اليمين) -->
+                    <div
+                        class="flex items-center gap-3 shrink-0 bg-darkSurface border border-darkBorder rounded-full py-1.5 pr-1.5 pl-5 cursor-pointer hover:border-primary/40 transition-all shadow-sm w-full lg:w-auto justify-between lg:justify-start">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
+                                    class="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover border-2 border-darkBorder bg-darkBg shadow-sm">
+                                <div
+                                    class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border border-darkBg rounded-full">
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[120px]">
+                                    جاري التحميل...</h1>
+                                <p class="text-[10px] text-textMuted mt-0.5">حساب نشط</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- شريط الأقسام (الكبسولة) بجانب البروفايل -->
+                    <div
+                        class="bg-[#15181e] p-1.5 rounded-[2rem] flex flex-1 w-full border border-darkBorder relative text-xs md:text-sm font-bold shadow-inner overflow-x-auto hide-scrollbar">
+                        <div id="nav-indicator"
+                            class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(25%-3px)] rounded-[1.5rem] transition-all duration-300 shadow bg-[#2a303c] border border-darkBorder right-1.5 z-0"
+                            style="right: 1.5px;"></div>
+
+                        <button onclick="navigate('inbox', 0)" id="tab-inbox"
+                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-white transition-colors text-center flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-inbox"></i> <span class="hidden sm:inline">الوارد</span>
+                        </button>
+                        <button onclick="navigate('outbox', 1)" id="tab-outbox"
+                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-textMuted transition-colors text-center flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">الصادر</span>
+                        </button>
+                        <button onclick="navigate('send', 2)" id="tab-send"
+                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-textMuted transition-colors text-center flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-plus-circle"></i> <span class="hidden sm:inline">إرسال</span>
+                        </button>
+                        <button onclick="navigate('contacts', 3)" id="tab-contacts"
+                            class="nav-btn min-w-[80px] relative flex-1 py-3 z-10 text-textMuted transition-colors text-center flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-users"></i> <span class="hidden sm:inline">الدليل</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </header>
 
         <!-- منطقة المحتوى الرئيسية -->
-        <main class="flex-1 flex flex-col bg-darkBg relative w-full h-full overflow-hidden">
-
-            <!-- شريط علوي للهواتف -->
-            <header
-                class="md:hidden h-16 border-b border-darkBorder bg-darkSurface flex items-center justify-between px-4 sticky top-0 z-10">
-                <div class="flex items-center gap-2 text-primary font-bold text-lg">
-                    <i class="fa-solid fa-folder-open"></i> فلو
-                </div>
-                <button onclick="toggleSidebar()"
-                    class="w-10 h-10 flex items-center justify-center text-textMain rounded-lg bg-darkHover">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </header>
+        <main class="flex-1 bg-darkBg relative w-full h-full overflow-y-auto">
 
             <!-- حاوية الصفحات -->
-            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="p-4 md:p-8 max-w-6xl mx-auto h-full">
 
                 <!-- صفحة صندوق الوارد -->
-                <div id="page-inbox" class="app-page">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-textMain"><i
-                                class="fa-solid fa-inbox ml-2 text-primary"></i>صندوق الوارد</h2>
-                        <span id="inbox-count"
-                            class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
-                            ملفات</span>
-                    </div>
-                    <div id="inbox-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        <!-- ملفات الوارد -->
+                <div id="page-inbox" class="app-page h-full w-full">
+                    <div class="flex flex-col w-full h-full">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-textMain"><i
+                                    class="fa-solid fa-inbox ml-2 text-primary"></i>صندوق الوارد</h2>
+                            <span id="inbox-count"
+                                class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
+                                ملفات</span>
+                        </div>
+                        <!-- مستطيلات أفقية -->
+                        <div id="inbox-grid" class="flex flex-col gap-3 pb-10 w-full">
+                            <!-- ملفات الوارد -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- صفحة صندوق الصادر -->
-                <div id="page-outbox" class="app-page hidden">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-textMain"><i
-                                class="fa-solid fa-paper-plane ml-2 text-primary"></i>صندوق الصادر</h2>
-                        <span id="outbox-count"
-                            class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
-                            ملفات</span>
-                    </div>
-                    <div id="outbox-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        <!-- ملفات الصادر -->
+                <div id="page-outbox" class="app-page hidden h-full w-full">
+                    <div class="flex flex-col w-full h-full">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-textMain"><i
+                                    class="fa-solid fa-paper-plane ml-2 text-primary"></i>صندوق الصادر</h2>
+                            <span id="outbox-count"
+                                class="bg-darkSurface border border-darkBorder text-textMuted text-xs font-bold px-3 py-1 rounded-full">0
+                                ملفات</span>
+                        </div>
+                        <!-- مستطيلات أفقية -->
+                        <div id="outbox-grid" class="flex flex-col gap-3 pb-10 w-full">
+                            <!-- ملفات الصادر -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- صفحة إرسال ملف -->
-                <div id="page-send" class="app-page hidden max-w-5xl mx-auto mt-2 pb-10">
-                    <div class="text-center mb-8 fade-in">
-                        <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl border border-primary/20 shadow-lg shadow-primary/10 transform -rotate-3">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </div>
-                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-indigo-400 to-purple-400">إرسال ملف جديد</h2>
-                        <p class="text-textMuted text-sm mt-3 font-medium">خطوتان سريعتان لاختيار المستلم ورفع الملف بسلاسة تامة.</p>
-                    </div>
-
-                    <!-- شريط التنقل بين القسمين (مستوحى من الصورة) -->
-                    <div class="bg-darkBg p-1.5 rounded-[2rem] flex mx-auto max-w-sm border border-darkBorder mb-8 relative text-sm font-bold shadow-inner fade-in" style="animation-delay: 0.1s;">
-                        <div id="tab-indicator" class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(50%-6px)] rounded-[1.5rem] transition-all duration-300 shadow bg-[#2a303c] border border-darkBorder right-1.5 transform translate-x-0"></div>
-                        
-                        <button onclick="switchSendTab('recipient')" id="tab-btn-recipient" class="relative flex-1 py-3 z-10 text-textMain transition-colors">
-                            اختيار المستلم
-                        </button>
-                        <button onclick="switchSendTab('file')" id="tab-btn-file" class="relative flex-1 py-3 z-10 text-textMuted transition-colors text-center">
-                            رفع الملف المرفق
-                        </button>
-                    </div>
-
-                    <div class="fade-in max-w-2xl mx-auto" style="animation-delay: 0.2s;">
-                        
-                        <!-- القسم الأول: المستلم -->
-                        <div id="panel-recipient" class="bg-darkSurface border border-darkBorder rounded-3xl p-6 lg:p-8 shadow-xl relative overflow-hidden flex flex-col min-h-[480px]">
-                            <div class="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl translate-x-12 -translate-y-12 pointer-events-none"></div>
-                            
-                            <div class="flex items-center gap-4 mb-6 relative">
-                                <div class="w-10 h-10 rounded-xl bg-darkBg border border-darkBorder flex items-center justify-center text-primary font-bold shadow-inner">1</div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-textMain">اختيار المستلم</h3>
-                                    <p class="text-xs text-textMuted mt-1">ابحث عن الشخص المراد إرسال الملف إليه</p>
-                                </div>
-                            </div>
-
-                            <div class="relative mb-4 z-10">
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-textMuted">
-                                    <i class="fa-solid fa-search"></i>
-                                </div>
-                                <input type="text" id="recipient-search" placeholder="ابحث عن اسم المستخدم..."
-                                    oninput="filterRecipientList()"
-                                    class="w-full bg-darkBg border border-darkBorder rounded-2xl pr-12 pl-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-textMain transition-all shadow-inner text-sm">
-                            </div>
-                            
-                            <div id="recipient-list" class="flex-1 overflow-y-auto pr-1 grid grid-cols-1 gap-2 custom-scrollbar relative z-10">
-                                <!-- يتم التوليد برمجياً -->
-                            </div>
-                            <input type="hidden" id="selected-recipient-id">
+                <div id="page-send" class="app-page hidden h-full w-full">
+                    <div class="flex flex-col h-full max-w-3xl mx-auto w-full">
+                        <div class="text-center mb-8 fade-in shrink-0">
+                            <h2
+                                class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-indigo-400 to-purple-400">
+                                إرسال ملف جديد</h2>
+                            <p class="text-textMuted text-sm mt-2 font-medium">اختر المستلم وارفع الملف (حتى 100
+                                ميجابايت).</p>
                         </div>
 
-                        <!-- القسم الثاني: الملف والرفع -->
-                        <div id="panel-file" class="hidden flex-col gap-6">
-                            
-                            <div class="bg-darkSurface border border-darkBorder rounded-3xl p-6 lg:p-8 shadow-xl relative overflow-hidden flex-1 flex flex-col min-h-[480px]">
-                                <div class="absolute bottom-0 left-0 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl -translate-x-12 translate-y-12 pointer-events-none"></div>
-                                
-                                <div class="flex items-center gap-4 mb-6 relative">
-                                    <div class="w-10 h-10 rounded-xl bg-darkBg border border-darkBorder flex items-center justify-center text-emerald-400 font-bold shadow-inner">2</div>
-                                    <div>
-                                        <h3 class="text-lg font-bold text-textMain">رفع الملف المرفق</h3>
-                                        <p class="text-xs text-textMuted mt-1">الصور، المستندات، والملفات المضغوطة</p>
+                        <div
+                            class="fade-in bg-darkSurface border border-darkBorder rounded-3xl p-5 md:p-8 shadow-2xl flex flex-col relative overflow-hidden w-full">
+                            <div
+                                class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-x-32 translate-y-32 pointer-events-none">
+                            </div>
+                            <div
+                                class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl translate-x-32 -translate-y-32 pointer-events-none">
+                            </div>
+
+                            <input type="file" id="file-upload-input" class="hidden"
+                                onchange="handleFileSelection(event)"
+                                accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar">
+
+                            <div id="dropzone" onclick="document.getElementById('file-upload-input').click()"
+                                class="dropzone rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer bg-darkBg/50 border-2 border-dashed border-darkBorder hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all group relative z-10 mb-6 min-h-[250px] w-full">
+                                <div id="file-preview-area"
+                                    class="text-center w-full flex flex-col items-center transition-transform group-hover:scale-105">
+                                    <div
+                                        class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-4 border-2 border-darkBg shadow-lg relative">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
                                     </div>
-                                </div>
-
-                                <input type="file" id="file-upload-input" class="hidden"
-                                    onchange="handleFileSelection(event)"
-                                    accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar">
-                                
-                                <div id="dropzone" onclick="document.getElementById('file-upload-input').click()"
-                                    class="dropzone flex-1 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-darkBg/50 border-2 border-dashed border-darkBorder hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all group relative z-10">
-                                    <div id="file-preview-area" class="text-center w-full flex flex-col items-center transition-transform group-hover:scale-105">
-                                        <div class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-5 border-4 border-darkBg shadow-lg relative">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-darkBg rounded-full flex items-center justify-center border border-darkBorder">
-                                                <i class="fa-solid fa-plus text-[10px] text-textMain"></i>
-                                            </div>
-                                        </div>
-                                        <p class="text-textMain font-bold text-lg mb-2" id="file-name-display">اضغط هنا أو اسحب الملف</p>
-                                        <div class="flex items-center gap-2 text-textMuted text-xs mt-1">
-                                            <span class="bg-darkSurface px-2 py-1 rounded-md border border-darkBorder">الحد الأقصى 10MB</span>
-                                        </div>
+                                    <p class="text-textMain font-bold text-lg mb-1" id="file-name-display">اضغط هنا أو
+                                        اسحب الملف</p>
+                                    <div class="flex items-center gap-2 text-textMuted text-sm mt-2">
+                                        <span
+                                            class="bg-darkSurface px-3 py-1 rounded-md border border-darkBorder text-emerald-400/80">الحد
+                                            الأقصى 100MB</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- زر الإرسال -->
-                            <button onclick="submitTransfer()" id="btn-submit-transfer" disabled
-                                class="w-full bg-gradient-to-l from-primary to-indigo-600 hover:from-primaryHover hover:to-indigo-700 disabled:from-darkSurface disabled:to-darkSurface disabled:text-textMuted disabled:border disabled:border-darkBorder disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-primary/20 disabled:shadow-none flex items-center justify-center gap-3 text-lg transform hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:opacity-70 group">
-                                <i class="fa-solid fa-paper-plane group-hover:translate-x-1 group-disabled:translate-x-0 transition-transform"></i> 
-                                <span>إرسال الملف الآن</span>
-                            </button>
+                            <div class="flex flex-col sm:flex-row gap-4 relative z-10 w-full">
+                                <input type="hidden" id="selected-recipient-id">
+
+                                <button id="btn-open-recipient-modal" onclick="openRecipientModal()"
+                                    class="flex-1 bg-darkBg border-2 border-darkBorder hover:border-primary/50 text-textMain font-bold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-3 min-h-[60px]">
+                                    <i class="fa-solid fa-user-plus text-primary text-xl"></i>
+                                    <span id="recipient-btn-text" class="truncate">اختيار المستلم</span>
+                                </button>
+
+                                <button onclick="submitTransfer()" id="btn-submit-transfer" disabled
+                                    class="flex-[2] relative overflow-hidden bg-gradient-to-l from-primary to-indigo-600 hover:from-primaryHover hover:to-indigo-700 disabled:from-darkSurface disabled:to-darkSurface disabled:text-textMuted disabled:border disabled:border-darkBorder disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-primary/20 disabled:shadow-none min-h-[60px] group">
+                                    <div id="upload-progress-bar"
+                                        class="absolute top-0 right-0 bottom-0 bg-emerald-500 w-0 transition-all duration-300 z-0">
+                                    </div>
+                                    <div
+                                        class="relative z-10 flex items-center justify-center gap-3 w-full h-full text-lg">
+                                        <i id="btn-submit-icon"
+                                            class="fa-solid fa-paper-plane group-hover:-translate-x-1 group-disabled:translate-x-0 transition-transform"></i>
+                                        <span id="btn-submit-text">إرسال الملف الآن</span>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- صفحة جهات الاتصال -->
-                <div id="page-contacts" class="app-page hidden">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-textMain"><i
-                                class="fa-solid fa-users ml-2 text-primary"></i>دليل المستخدمين</h2>
-                        <div class="relative w-48 md:w-64">
-                            <input type="text" id="contacts-search-input" oninput="renderContactsPage()"
-                                placeholder="بحث..."
-                                class="w-full bg-darkSurface border border-darkBorder rounded-full py-2 pr-10 pl-4 text-sm focus:border-primary outline-none text-textMain">
-                            <i
-                                class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-xs"></i>
+                <div id="page-contacts" class="app-page hidden h-full w-full">
+                    <div class="flex flex-col w-full h-full">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-textMain"><i
+                                    class="fa-solid fa-users ml-2 text-primary"></i>دليل المستخدمين</h2>
+                            <div class="relative w-48 md:w-64">
+                                <input type="text" id="contacts-search-input" oninput="renderContactsPage()"
+                                    placeholder="بحث..."
+                                    class="w-full bg-darkSurface border border-darkBorder rounded-full py-2 pr-10 pl-4 text-sm focus:border-primary outline-none text-textMain">
+                                <i
+                                    class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-xs"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div id="contacts-page-grid"
-                        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <!-- جهات الاتصال -->
+                        <!-- مستطيلات أفقية -->
+                        <div id="contacts-page-grid" class="flex flex-col gap-3 pb-10 w-full">
+                            <!-- جهات الاتصال -->
+                        </div>
                     </div>
                 </div>
 
@@ -417,31 +415,44 @@
 
         let myUser = null;
         let usersData = [];
-        let transfersData = []; // الملفات المرسلة والمستقبلة
+        let transfersData = [];
         let currentPage = 'inbox';
         let selectedFile = null;
 
         const USERS_PATH = 'users';
         const MESSAGES_PATH = 'messages';
 
-        // 1. التهيئة ومراقبة حالة الدخول
+        // 1. التهيئة مع التخطي للأخطاء
         onAuthStateChanged(auth, async (user) => {
             const loading = document.getElementById('loading-screen');
             const setupModal = document.getElementById('setup-modal');
 
             if (user) {
-                const userRef = doc(db, USERS_PATH, user.uid);
-                const userSnap = await getDoc(userRef);
+                try {
+                    const userRef = doc(db, USERS_PATH, user.uid);
+                    const userSnap = await getDoc(userRef);
 
-                loading.classList.add('opacity-0', 'pointer-events-none');
-                setupModal.classList.add('hidden');
+                    loading.classList.add('opacity-0', 'pointer-events-none');
+                    setupModal.classList.add('hidden');
 
-                if (userSnap.exists()) {
-                    myUser = { ...userSnap.data(), uid: user.uid };
-                    updateMyProfileUI();
-                    startDataListeners();
-                } else {
-                    setupModal.classList.remove('hidden');
+                    if (userSnap.exists()) {
+                        myUser = { ...userSnap.data(), uid: user.uid };
+                        updateMyProfileUI();
+                        startDataListeners();
+                    } else {
+                        setupModal.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Firebase connection error:", error);
+                    loading.innerHTML = `
+                        <div class="relative w-20 h-20 mb-6 flex items-center justify-center mx-auto">
+                            <i class="fa-solid fa-wifi text-5xl text-rose-500 opacity-80"></i>
+                            <div class="absolute w-16 h-1.5 bg-rose-500 transform -rotate-45 rounded-full shadow-md"></div>
+                        </div>
+                        <h1 class="text-2xl font-bold tracking-wider text-rose-400">تعذر الاتصال بالخادم</h1>
+                        <p class="text-textMuted text-sm mt-3 max-w-xs text-center leading-relaxed mx-auto">لم يتمكن التطبيق من جلب البيانات. يرجى التحقق من اتصالك بالإنترنت وإعادة المحاولة.</p>
+                        <button onclick="window.location.reload()" class="mt-8 px-8 py-3 bg-darkSurface border border-darkBorder hover:border-rose-500/50 hover:text-rose-400 text-textMain font-bold rounded-xl transition-colors shadow-lg">إعادة تحميل الصفحة</button>
+                    `;
                 }
             } else {
                 loading.classList.add('opacity-0', 'pointer-events-none');
@@ -449,43 +460,39 @@
             }
         });
 
-        // 2. إعداد الحساب والدخول
+        // 2. إعداد الحساب
         window.saveUserProfile = async () => {
             const nameInput = document.getElementById('setup-name-input').value.trim();
             const passInput = document.getElementById('setup-password-input').value;
-            
+
             if (!nameInput) return alert('يرجى كتابة اسمك');
             if (!passInput || passInput.length < 6) return alert('يرجى إدخال كلمة مرور تتكون من 6 أحرف أو أرقام على الأقل');
 
             const hexName = Array.from(nameInput.toLowerCase()).map(c => c.charCodeAt(0).toString(16)).join('');
             const syntheticEmail = `u_${hexName}@flow.local`;
-            
+
             const btnText = document.getElementById('auth-btn-text');
             const originalText = btnText.innerText;
             btnText.innerText = 'جاري التحقق...';
 
             try {
-                // المحاولة الأولى: إنشاء حساب جديد إذا لم يكن الاسم مستخدماً مسبقاً
                 const userCredential = await createUserWithEmailAndPassword(auth, syntheticEmail, passInput);
                 const user = userCredential.user;
-                
+
                 const seed = Math.random().toString(36).substring(7);
                 const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=6366f1`;
 
                 const newUserData = { name: nameInput, avatar: avatarUrl, timestamp: serverTimestamp() };
                 await setDoc(doc(db, USERS_PATH, user.uid), newUserData);
             } catch (err) {
-                // إذا كان البريد (الاسم) مسجلاً مسبقاً
                 if (err.code === 'auth/email-already-in-use') {
                     try {
-                        // نحاول تسجيل الدخول باستخدام كلمة المرور المدخلة
                         await signInWithEmailAndPassword(auth, syntheticEmail, passInput);
                     } catch (signErr) {
-                        alert('هذا الاسم مسجل مسبقاً! كلمة المرور التي أدخلتها خاطئة، تأكد منها أو اشترك باسم مختلف.');
+                        alert('هذا الاسم مسجل مسبقاً! كلمة المرور خاطئة.');
                     }
                 } else {
                     alert('حدث خطأ: ' + err.message);
-                    console.error(err);
                 }
             } finally {
                 btnText.innerText = originalText;
@@ -497,63 +504,38 @@
             document.getElementById('my-name-display').textContent = myUser.name;
         }
 
-        // 3. التنقل بين الصفحات
-        window.navigate = (pageId) => {
+        // 3. التنقل (إصلاح مشكلة الـ Layout)
+        window.navigate = (pageId, index) => {
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-primary/10', 'text-primary');
+                btn.classList.remove('text-white');
                 btn.classList.add('text-textMuted');
             });
-            const activeBtn = document.getElementById(`nav-${pageId}`);
+            const activeBtn = document.getElementById(`tab-${pageId}`);
             if (activeBtn) {
                 activeBtn.classList.remove('text-textMuted');
-                activeBtn.classList.add('bg-primary/10', 'text-primary');
+                activeBtn.classList.add('text-white');
             }
 
-            document.querySelectorAll('.app-page').forEach(page => page.classList.add('hidden'));
-            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            const indicator = document.getElementById('nav-indicator');
+            if (index !== undefined) {
+                indicator.style.right = `calc(${index * 25}% + 1.5px)`;
+            }
+
+            // إخفاء كل الصفحات عن طريق إضافة hidden فقط (بدون التلاعب بـ flex)
+            document.querySelectorAll('.app-page').forEach(page => {
+                page.classList.add('hidden');
+                page.classList.remove('block');
+            });
+
+            // إظهار الصفحة المستهدفة باستخدام block، لأن بداخلها div يعمل كـ flex-col
+            const targetPage = document.getElementById(`page-${pageId}`);
+            targetPage.classList.remove('hidden');
+            targetPage.classList.add('block');
 
             currentPage = pageId;
-            document.getElementById('sidebar').classList.remove('open');
 
             if (pageId === 'inbox' || pageId === 'outbox') renderFilesGrid();
-            if (pageId === 'send') {
-                renderSendFormUsers();
-                if (window.switchSendTab) window.switchSendTab('recipient');
-            }
             if (pageId === 'contacts') renderContactsPage();
-        };
-
-        window.switchSendTab = (tabId) => {
-            const indicator = document.getElementById('tab-indicator');
-            const btnRecipient = document.getElementById('tab-btn-recipient');
-            const btnFile = document.getElementById('tab-btn-file');
-            
-            const panelRecipient = document.getElementById('panel-recipient');
-            const panelFile = document.getElementById('panel-file');
-
-            if (tabId === 'recipient') {
-                indicator.style.transform = 'translateX(0)';
-                btnRecipient.classList.replace('text-textMuted', 'text-textMain');
-                btnFile.classList.replace('text-textMain', 'text-textMuted');
-                
-                panelFile.classList.add('hidden');
-                panelFile.classList.remove('flex');
-                panelRecipient.classList.remove('hidden');
-                panelRecipient.classList.add('flex');
-            } else {
-                indicator.style.transform = 'translateX(-100%)';
-                btnFile.classList.replace('text-textMuted', 'text-textMain');
-                btnRecipient.classList.replace('text-textMain', 'text-textMuted');
-                
-                panelRecipient.classList.add('hidden');
-                panelRecipient.classList.remove('flex');
-                panelFile.classList.remove('hidden');
-                panelFile.classList.add('flex');
-            }
-        };
-
-        window.toggleSidebar = () => {
-            document.getElementById('sidebar').classList.toggle('open');
         };
 
         // 4. جلب البيانات
@@ -565,8 +547,10 @@
                 snapshot.forEach(doc => {
                     if (doc.id !== myUser.uid) usersData.push({ ...doc.data(), uid: doc.id });
                 });
-                if (currentPage === 'send') renderSendFormUsers();
                 if (currentPage === 'contacts') renderContactsPage();
+                if (!document.getElementById('recipient-modal').classList.contains('hidden')) {
+                    renderRecipientModalList();
+                }
             });
 
             onSnapshot(collection(db, MESSAGES_PATH), (snapshot) => {
@@ -586,7 +570,7 @@
             });
         }
 
-        // 5. عرض الملفات
+        // 5. عرض الملفات (مستطيلات أفقية سليمة 100%)
         function renderFilesGrid() {
             const isInbox = currentPage === 'inbox';
             const gridId = isInbox ? 'inbox-grid' : 'outbox-grid';
@@ -603,7 +587,7 @@
 
             if (filesToShow.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full flex flex-col items-center justify-center py-20 text-textMuted text-center">
+                    <div class="flex flex-col items-center justify-center py-20 text-textMuted text-center w-full">
                         <i class="fa-solid fa-folder-open text-6xl mb-4 opacity-20"></i>
                         <p class="text-lg">لا توجد ملفات ${isInbox ? 'واردة' : 'صادرة'} بعد.</p>
                     </div>`;
@@ -612,7 +596,7 @@
 
             filesToShow.forEach(file => {
                 const otherUserId = isInbox ? file.senderId : file.receiverId;
-                const otherUser = usersData.find(u => u.uid === otherUserId) || { name: 'مستخدم غير معروف', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G' };
+                const otherUser = usersData.find(u => u.uid === otherUserId) || { name: 'مستخدم محذوف', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=G' };
 
                 let timeStr = '';
                 if (file.timestamp) {
@@ -621,64 +605,85 @@
 
                 let iconHtml = '';
                 let fileNameDisplay = file.fileName || 'صورة مرفقة';
-                let fileSizeDisplay = file.fileSize || 'غير معروف';
+                let fileSizeDisplay = file.fileSize || 'مضغوطة';
                 let actionHtml = '';
 
                 if (file.type === 'image') {
-                    iconHtml = `<div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
-                    actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="w-full bg-darkHover hover:bg-darkBorder text-textMain text-sm font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> تحميل الصورة</a>`;
-                    fileSizeDisplay = 'صورة مضغوطة';
+                    iconHtml = `<div class="w-12 h-12 md:w-14 md:h-14 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
+                    actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="bg-darkHover hover:bg-darkBorder border border-darkBorder text-textMain text-sm font-bold py-2.5 px-4 md:px-6 rounded-xl transition-colors flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> <span class="hidden sm:inline">تحميل</span></a>`;
                 } else if (file.type === 'file_chunked') {
                     const isPdf = fileNameDisplay.toLowerCase().endsWith('.pdf');
                     const isWord = fileNameDisplay.toLowerCase().endsWith('.doc') || fileNameDisplay.toLowerCase().endsWith('.docx');
-                    const colorClass = isPdf ? 'text-rose-400 bg-rose-500/20' : (isWord ? 'text-blue-400 bg-blue-500/20' : 'text-emerald-400 bg-emerald-500/20');
+                    const colorClass = isPdf ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : (isWord ? 'text-blue-400 bg-blue-500/10 border-blue-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20');
                     const iconClass = isPdf ? 'fa-file-pdf' : (isWord ? 'fa-file-word' : 'fa-file-lines');
 
-                    iconHtml = `<div class="w-12 h-12 ${colorClass} rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${iconClass}"></i></div>`;
-                    actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="w-full bg-primary/20 hover:bg-primary hover:text-white text-primary text-sm font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> تحميل الملف</button>`;
+                    iconHtml = `<div class="w-12 h-12 md:w-14 md:h-14 ${colorClass} border rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${iconClass}"></i></div>`;
+                    actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="bg-primary/10 hover:bg-primary border border-primary/20 hover:border-primary hover:text-white text-primary text-sm font-bold py-2.5 px-4 md:px-6 rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"><i class="fa-solid fa-download"></i> <span class="hidden sm:inline">تحميل</span></button>`;
                 }
 
+                // الكارت بعرض الشاشة بالكامل وبشكل مرتب
                 const cardHtml = `
-                    <div class="file-card bg-darkSurface border border-darkBorder rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden">
-                        <div class="flex items-start gap-3">
+                    <div class="list-card w-full bg-darkSurface border border-darkBorder rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden">
+                        
+                        <div class="flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
                             ${iconHtml}
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-bold text-textMain text-sm truncate" title="${fileNameDisplay}">${fileNameDisplay}</h4>
-                                <p class="text-xs text-textMuted mt-1">${fileSizeDisplay}</p>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-bold text-textMain text-sm md:text-base truncate" title="${fileNameDisplay}">${fileNameDisplay}</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-textMuted bg-darkBg px-2 py-0.5 rounded border border-darkBorder">${fileSizeDisplay}</span>
+                                    <span class="text-[10px] text-textMuted sm:hidden">${timeStr}</span>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="bg-darkBg rounded-xl p-3 border border-darkBorder/50 flex items-center gap-3">
-                            <img src="${otherUser.avatar}" class="w-8 h-8 rounded-full border border-darkBorder bg-darkBg">
-                            <div class="min-w-0 flex-1">
-                                <p class="text-[10px] text-textMuted">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
-                                <p class="text-xs font-bold text-textMain truncate">${otherUser.name}</p>
+                        <div class="flex flex-col sm:flex-row items-end sm:items-center justify-between sm:justify-end gap-4 w-full sm:w-auto shrink-0 border-t sm:border-t-0 border-darkBorder/50 pt-3 sm:pt-0">
+                            <div class="flex items-center gap-3">
+                                <div class="text-left hidden sm:block">
+                                    <p class="text-[10px] text-textMuted">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
+                                    <p class="text-xs font-bold text-textMain truncate w-24">${otherUser.name}</p>
+                                </div>
+                                <img src="${otherUser.avatar}" class="w-8 h-8 md:w-10 md:h-10 rounded-full border border-darkBorder bg-darkBg" title="${otherUser.name}">
+                            </div>
+                            
+                            <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                                <span class="text-xs text-textMuted hidden md:block w-24 text-center">${timeStr}</span>
+                                ${actionHtml}
                             </div>
                         </div>
 
-                        <div class="mt-auto pt-2 border-t border-darkBorder/50 flex flex-col gap-2">
-                            <span class="text-[10px] text-textMuted text-center w-full block mb-1">${timeStr}</span>
-                            ${actionHtml}
-                        </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
 
-        // 6. صفحة الإرسال
-        window.filterRecipientList = () => renderSendFormUsers();
+        // 6. النافذة المنبثقة لاختيار المستلم
+        window.openRecipientModal = () => {
+            document.getElementById('recipient-modal').classList.remove('hidden');
+            document.getElementById('recipient-modal').classList.add('flex');
+            document.getElementById('recipient-search').value = '';
+            renderRecipientModalList();
+        };
 
-        function renderSendFormUsers() {
+        window.closeRecipientModal = () => {
+            document.getElementById('recipient-modal').classList.add('hidden');
+            document.getElementById('recipient-modal').classList.remove('flex');
+        };
+
+        window.filterRecipientModalList = () => {
+            renderRecipientModalList();
+        };
+
+        function renderRecipientModalList() {
             const searchQ = document.getElementById('recipient-search').value.toLowerCase();
-            const list = document.getElementById('recipient-list');
+            const list = document.getElementById('modal-recipient-list');
             if (!list) return;
             list.innerHTML = '';
 
             const filtered = usersData.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
 
             if (filtered.length === 0) {
-                list.innerHTML = `<p class="text-xs text-textMuted text-center py-4 w-full col-span-full">لا يوجد مستخدم بهذا الاسم</p>`;
+                list.innerHTML = `<p class="text-sm text-textMuted text-center py-10 w-full">لا يوجد مستخدم بهذا الاسم</p>`;
                 return;
             }
 
@@ -687,30 +692,45 @@
             filtered.forEach(u => {
                 const isSelected = currentSelectedId === u.uid;
                 const html = `
-                    <div onclick="selectRecipient('${u.uid}')" 
-                        class="cursor-pointer flex items-center gap-4 p-3 rounded-2xl border ${isSelected ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5' : 'border-darkBorder bg-darkBg hover:bg-darkHover hover:border-textMuted/30'} transition-all group">
+                    <div onclick="selectRecipient('${u.uid}', '${u.name}', '${u.avatar}')" 
+                        class="cursor-pointer flex items-center gap-3 p-3 rounded-xl border ${isSelected ? 'border-primary bg-primary/10 shadow-md' : 'border-darkBorder bg-darkBg hover:bg-darkHover hover:border-textMuted/30'} transition-all group shrink-0">
                         <img src="${u.avatar}" class="w-10 h-10 rounded-full bg-darkBg border-2 ${isSelected ? 'border-primary' : 'border-darkBorder group-hover:border-textMuted/50'} transition-colors">
-                        <span class="text-sm font-bold ${isSelected ? 'text-primary' : 'text-textMain'} truncate">${u.name}</span>
-                        ${isSelected ? `<i class="fa-solid fa-circle-check text-primary text-xl mr-auto fade-in"></i>` : `<i class="fa-solid fa-chevron-left text-textMuted text-xs mr-auto opacity-0 group-hover:opacity-100 transition-opacity"></i>`}
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-bold ${isSelected ? 'text-primary' : 'text-textMain'} truncate">${u.name}</h4>
+                        </div>
+                        ${isSelected ? `<i class="fa-solid fa-circle-check text-primary text-lg fade-in"></i>` : `<i class="fa-solid fa-chevron-left text-textMuted text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>`}
                     </div>
                 `;
                 list.insertAdjacentHTML('beforeend', html);
             });
         }
 
-        window.selectRecipient = (uid) => {
+        window.selectRecipient = (uid, name, avatarUrl) => {
             document.getElementById('selected-recipient-id').value = uid;
-            renderSendFormUsers();
+            const btnText = document.getElementById('recipient-btn-text');
+            btnText.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <img src="${avatarUrl}" class="w-6 h-6 rounded-full border border-darkBorder">
+                    <span class="truncate max-w-[100px] text-sm">${name}</span>
+                </div>
+            `;
+            closeRecipientModal();
             checkSendReady();
         };
 
+        window.selectRecipientAndGo = (uid, name, avatarUrl) => {
+            selectRecipient(uid, name, avatarUrl);
+            navigate('send', 2);
+        };
+
+        // 7. معالجة الملفات والرفع
         window.handleFileSelection = (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            const maxSize = 10 * 1024 * 1024;
+            const maxSize = 100 * 1024 * 1024;
             if (file.size > maxSize) {
-                alert("الحد الأقصى للملف هو 10 ميجابايت.");
+                alert("الحد الأقصى للملف هو 100 ميجابايت.");
                 e.target.value = '';
                 return;
             }
@@ -722,14 +742,19 @@
             const iconHtml = isImage ? `<i class="fa-solid fa-image text-blue-400"></i>` : `<i class="fa-solid fa-file-lines text-emerald-400"></i>`;
 
             document.getElementById('file-preview-area').innerHTML = `
-                <div class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-darkBorder shadow-lg">
+                <div class="w-16 h-16 bg-darkSurface rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border border-darkBorder shadow-md relative group-hover:-translate-y-1 transition-transform">
                     ${iconHtml}
+                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-darkSurface flex items-center justify-center text-white text-[10px]">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
                 </div>
-                <p class="text-textMain font-bold mb-1 truncate px-4 w-full text-center" dir="ltr">${file.name}</p>
-                <p class="text-textMuted text-xs text-center font-bold">${sizeStr}</p>
-                <button onclick="clearFileSelection(event)" class="mt-4 text-sm font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-2 px-4 rounded-xl transition-colors shrink-0 flex items-center justify-center gap-2 mx-auto border border-rose-500/20"><i class="fa-solid fa-trash"></i> إزالة الملف المتصل</button>
+                <p class="text-textMain font-bold mb-1 truncate px-4 w-full max-w-[250px] text-center text-sm md:text-base" dir="ltr">${file.name}</p>
+                <p class="text-textMuted text-xs text-center font-bold mb-4 bg-darkBg px-2 py-1 rounded border border-darkBorder">${sizeStr}</p>
+                
+                <button id="btn-delete-file" onclick="clearFileSelection(event)" class="text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-2.5 px-6 rounded-xl transition-colors shrink-0 flex items-center justify-center gap-2 mx-auto border border-rose-500/20 z-20 relative">
+                    <i class="fa-solid fa-trash"></i> إزالة الملف
+                </button>
             `;
-
             checkSendReady();
         };
 
@@ -738,15 +763,12 @@
             selectedFile = null;
             document.getElementById('file-upload-input').value = '';
             document.getElementById('file-preview-area').innerHTML = `
-                <div class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-5 border-4 border-darkBg shadow-lg relative">
+                <div class="w-20 h-20 bg-darkSurface rounded-full flex items-center justify-center text-4xl text-emerald-400 mb-4 border-2 border-darkBg shadow-lg relative group-hover:-translate-y-1 transition-transform">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-darkBg rounded-full flex items-center justify-center border border-darkBorder">
-                        <i class="fa-solid fa-plus text-[10px] text-textMain"></i>
-                    </div>
                 </div>
-                <p class="text-textMain font-bold text-lg mb-2">اضغط هنا أو اسحب الملف</p>
-                <div class="flex items-center gap-2 text-textMuted text-xs mt-1">
-                    <span class="bg-darkSurface px-2 py-1 rounded-md border border-darkBorder">الحد الأقصى 10MB</span>
+                <p class="text-textMain font-bold text-lg mb-1">اضغط هنا أو اسحب الملف</p>
+                <div class="flex items-center gap-2 text-textMuted text-sm mt-2">
+                    <span class="bg-darkSurface px-3 py-1 rounded-md border border-darkBorder text-emerald-400/80">الحد الأقصى 100MB</span>
                 </div>
             `;
             checkSendReady();
@@ -762,13 +784,12 @@
             }
         }
 
-        // 7. الرفع
         function compressImage(base64Str, callback) {
             const img = new Image();
             img.src = base64Str;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                let width = img.width; let height = img.height; const MAX_SIZE = 1000;
+                let width = img.width; let height = img.height; const MAX_SIZE = 1200;
                 if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
                 else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
                 canvas.width = width; canvas.height = height;
@@ -782,28 +803,53 @@
             const recipientId = document.getElementById('selected-recipient-id').value;
             if (!recipientId || !selectedFile || !myUser) return;
 
-            const overlay = document.getElementById('upload-overlay');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            document.getElementById('upload-status-text').textContent = "جاري تحضير الملف...";
+            const btn = document.getElementById('btn-submit-transfer');
+            const btnIcon = document.getElementById('btn-submit-icon');
+            const btnText = document.getElementById('btn-submit-text');
+            const progressBar = document.getElementById('upload-progress-bar');
+
+            const deleteBtn = document.getElementById('btn-delete-file');
+            const dropzone = document.getElementById('dropzone');
+            const chooseUserBtn = document.getElementById('btn-open-recipient-modal');
+
+            if (deleteBtn) deleteBtn.style.display = 'none';
+            dropzone.style.pointerEvents = 'none';
+            chooseUserBtn.style.pointerEvents = 'none';
+            chooseUserBtn.classList.add('opacity-50');
+
+            btn.setAttribute('disabled', 'true');
+            btnIcon.className = 'fa-solid fa-spinner fa-spin';
+            btnText.innerText = 'جاري التجهيز...';
+            progressBar.style.width = '2%';
 
             const file = selectedFile;
             const isImage = file.type.startsWith('image/');
-
             const reader = new FileReader();
+
             reader.onload = async function (e) {
                 try {
                     if (isImage) {
-                        document.getElementById('upload-status-text').textContent = "جاري ضغط ورفع الصورة...";
+                        btnText.innerText = 'جاري ضغط ورفع الصورة...';
+                        let simProgress = 10;
+                        const simInterval = setInterval(() => {
+                            simProgress += 10;
+                            if (simProgress > 90) clearInterval(simInterval);
+                            progressBar.style.width = simProgress + '%';
+                            btnText.innerText = `${simProgress}%`;
+                        }, 150);
+
                         compressImage(e.target.result, async (compressedBase64) => {
                             await addDoc(collection(db, MESSAGES_PATH), {
                                 senderId: myUser.uid, receiverId: recipientId,
                                 type: 'image', fileUrl: compressedBase64, timestamp: serverTimestamp()
                             });
-                            finishTransfer();
+                            clearInterval(simInterval);
+                            progressBar.style.width = '100%';
+                            btnText.innerText = 'اكتمل بنجاح!';
+                            btnIcon.className = 'fa-solid fa-check';
+                            setTimeout(finishTransfer, 800);
                         });
                     } else {
-                        document.getElementById('upload-status-text').textContent = "جاري تقسيم ورفع المستند...";
                         const base64File = e.target.result;
                         let sizeStr = file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
 
@@ -814,34 +860,60 @@
 
                         const chunkSize = 800000;
                         const totalChunks = Math.ceil(base64File.length / chunkSize);
+
                         for (let i = 0; i < totalChunks; i++) {
                             const chunkData = base64File.substring(i * chunkSize, (i + 1) * chunkSize);
                             await setDoc(doc(db, MESSAGES_PATH, msgRef.id, 'chunks', String(i)), { data: chunkData });
+
+                            const currentPercentage = Math.round(((i + 1) / totalChunks) * 100);
+                            progressBar.style.width = currentPercentage + '%';
+                            btnText.innerText = `جاري الرفع... ${currentPercentage}%`;
                         }
-                        finishTransfer();
+
+                        progressBar.style.width = '100%';
+                        btnText.innerText = 'اكتمل بنجاح!';
+                        btnIcon.className = 'fa-solid fa-check';
+                        setTimeout(finishTransfer, 800);
                     }
                 } catch (err) {
-                    alert("حدث خطأ أثناء الرفع.");
-                    overlay.classList.add('hidden');
-                    overlay.classList.remove('flex');
+                    alert("حدث خطأ أثناء الرفع. تحقق من اتصالك.");
+                    resetSendUI();
                 }
             };
             reader.readAsDataURL(file);
         };
 
+        function resetSendUI() {
+            const btnText = document.getElementById('btn-submit-text');
+            const btnIcon = document.getElementById('btn-submit-icon');
+            const progressBar = document.getElementById('upload-progress-bar');
+            const deleteBtn = document.getElementById('btn-delete-file');
+            const dropzone = document.getElementById('dropzone');
+            const chooseUserBtn = document.getElementById('btn-open-recipient-modal');
+
+            if (deleteBtn) deleteBtn.style.display = 'flex';
+            dropzone.style.pointerEvents = 'auto';
+            chooseUserBtn.style.pointerEvents = 'auto';
+            chooseUserBtn.classList.remove('opacity-50');
+
+            progressBar.style.width = '0%';
+            btnIcon.className = 'fa-solid fa-paper-plane';
+            btnText.innerText = 'إرسال الملف الآن';
+            checkSendReady();
+        }
+
         function finishTransfer() {
-            document.getElementById('upload-overlay').classList.add('hidden');
-            document.getElementById('upload-overlay').classList.remove('flex');
             document.getElementById('selected-recipient-id').value = '';
-            document.getElementById('recipient-search').value = '';
+            document.getElementById('recipient-btn-text').innerText = 'اختيار المستلم';
             window.clearFileSelection();
-            navigate('outbox');
+            resetSendUI();
+            navigate('outbox', 1);
         }
 
         window.downloadChunkedFile = async (msgId, fileName) => {
             const btn = document.getElementById(`dl-btn-${msgId}`);
             const originalHtml = btn.innerHTML;
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...';
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span class="hidden sm:inline">جاري التحميل...</span>';
 
             try {
                 const chunksRef = collection(db, MESSAGES_PATH, msgId, 'chunks');
@@ -867,7 +939,7 @@
             }
         };
 
-        // 8. جهات الاتصال
+        // 8. دليل المستخدمين
         window.renderContactsPage = () => {
             if (currentPage !== 'contacts') return;
             const container = document.getElementById('contacts-page-grid');
@@ -878,19 +950,25 @@
             const filtered = usersData.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
 
             if (filtered.length === 0) {
-                container.innerHTML = `<p class="col-span-full text-center text-textMuted py-10">لا توجد جهات اتصال.</p>`;
+                container.innerHTML = `<p class="text-center text-textMuted py-10 w-full">لا توجد جهات اتصال.</p>`;
                 return;
             }
 
             filtered.forEach(u => {
                 const html = `
-                    <div class="bg-darkSurface border border-darkBorder rounded-2xl p-5 flex flex-col items-center text-center hover:border-primary transition-colors">
-                        <img src="${u.avatar}" class="w-16 h-16 rounded-full border-2 border-darkBorder mb-3 bg-darkBg">
-                        <h3 class="font-bold text-textMain text-sm w-full truncate">${u.name}</h3>
-                        <p class="text-xs text-textMuted mt-1 mb-4">مستخدم فلو</p>
-                        <button onclick="document.getElementById('selected-recipient-id').value = '${u.uid}'; navigate('send');" 
-                            class="w-full bg-darkBg border border-darkBorder hover:bg-primary/20 hover:text-primary hover:border-primary/50 text-textMuted text-xs font-bold py-2 rounded-lg transition-all">
-                            إرسال ملف
+                    <div class="list-card w-full bg-darkSurface border border-darkBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        
+                        <div class="flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
+                            <img src="${u.avatar}" class="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-darkBorder bg-darkBg shrink-0">
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-textMain text-base truncate">${u.name}</h3>
+                                <p class="text-xs text-textMuted mt-0.5">مستخدم فلو</p>
+                            </div>
+                        </div>
+
+                        <button onclick="selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
+                            class="w-full sm:w-auto bg-darkBg border border-darkBorder hover:bg-primary/20 hover:text-primary hover:border-primary text-textMuted text-sm font-bold py-2.5 px-8 rounded-xl transition-all whitespace-nowrap flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-xs"></i> إرسال ملف
                         </button>
                     </div>
                 `;
@@ -898,13 +976,20 @@
             });
         };
 
+        // أحداث السحب والإفلات
         const dropzone = document.getElementById('dropzone');
         if (dropzone) {
-            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
-            dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dragover'); });
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (dropzone.style.pointerEvents !== 'none') dropzone.classList.add('dragover');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('dragover');
+            });
             dropzone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropzone.classList.remove('dragover');
+                if (dropzone.style.pointerEvents === 'none') return;
                 if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                     const fileInput = document.getElementById('file-upload-input');
                     fileInput.files = e.dataTransfer.files;

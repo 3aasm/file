@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>تطبيق فلو | نقل الملفات</title>
 
     <!-- App Web App Meta Tags -->
@@ -20,8 +19,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Tailwind Configuration -->
     <script>
@@ -56,120 +54,76 @@
         }
 
         /* Custom Modern Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #3f3f46;
-            border-radius: 20px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #52525b;
-        }
-
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #3f3f46; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #52525b; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* Smooth Animations */
-        .fade-in-up {
-            animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
+        .fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Loading Box Scanner Animation */
+        @keyframes scan {
+            0% { top: -10%; opacity: 0; }
+            10% { opacity: 1; }
+            80% { top: 100%; opacity: 1; }
+            100% { top: 110%; opacity: 0; }
+        }
+        .animate-scan { animation: scan 1.5s ease-in-out infinite; }
 
         /* Modern Card Hover Effects */
-        .modern-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .modern-card:hover {
-            border-color: #3f3f46;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        }
+        .modern-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modern-card:hover { border-color: #3f3f46; transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
 
         /* Dropzone */
-        .dropzone {
-            border: 2px dashed #27272a;
-            transition: all 0.3s ease;
-        }
+        .dropzone { border: 2px dashed #27272a; transition: all 0.3s ease; }
+        .dropzone:hover, .dropzone.dragover { border-color: #6366f1; background-color: rgba(99, 102, 241, 0.05); }
 
-        .dropzone:hover,
-        .dropzone.dragover {
-            border-color: #6366f1;
-            background-color: rgba(99, 102, 241, 0.05);
-        }
-
-        /* Safe area padding for mobile notch/status bar */
-        .pt-safe-top {
-            padding-top: max(2rem, env(safe-area-inset-top));
-        }
-
-        .pb-safe-bottom {
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        }
+        /* Safe area padding */
+        .pt-safe-top { padding-top: max(2rem, env(safe-area-inset-top)); }
+        .pb-safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 
         /* Active Nav indicator */
-        .nav-active {
-            background-color: #18181b;
-            color: #f4f4f5;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-        }
+        .nav-active { background-color: #18181b; color: #f4f4f5; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
     </style>
 </head>
 
 <body class="font-sans h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white">
 
-    <!-- شاشة التحميل -->
-    <div id="loading-screen"
-        class="fixed inset-0 bg-background z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="relative w-16 h-16 flex items-center justify-center mb-6">
-            <div class="absolute inset-0 border-4 border-surface rounded-2xl transform rotate-45"></div>
-            <div
-                class="absolute inset-0 border-4 border-primary rounded-2xl transform rotate-45 border-t-transparent animate-spin">
-            </div>
-            <i class="fa-solid fa-paper-plane text-xl text-primary animate-pulse relative z-10"></i>
+    <!-- شاشة التحميل (الأنيميشن الجديد) -->
+    <div id="loading-screen" class="fixed inset-0 bg-background z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-24 h-24 border-2 border-borderLine rounded-2xl overflow-hidden mb-6 bg-surface shadow-lg flex items-center justify-center">
+            <div class="absolute inset-0 bg-primary/10"></div>
+            <!-- الخط المتحرك -->
+            <div class="absolute left-0 w-full h-1 bg-primary shadow-[0_0_20px_rgba(99,102,241,1)] animate-scan"></div>
+            <i class="fa-solid fa-paper-plane text-4xl text-primary relative z-10"></i>
         </div>
-        <h1 class="text-2xl font-black tracking-widest text-textMain">FLOW</h1>
+        <h1 class="text-3xl font-black tracking-widest text-textMain">FLOW</h1>
     </div>
 
-    <!-- نافذة تسجيل الدخول (إلزامية) -->
-    <div id="setup-modal"
-        class="fixed inset-0 bg-black/90 backdrop-blur-md z-[90] hidden flex-col items-center justify-center p-4 transition-all">
-        <div
-            class="bg-surface border border-borderLine rounded-[2rem] p-8 md:p-10 max-w-sm w-full fade-in-up shadow-2xl relative overflow-hidden">
+    <!-- نافذة تسجيل الدخول/إنشاء حساب -->
+    <div id="setup-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[90] hidden flex-col items-center justify-center p-4 transition-all overflow-y-auto">
+        <div class="bg-surface border border-borderLine rounded-[2rem] p-6 md:p-10 max-w-sm w-full fade-in-up shadow-2xl relative overflow-hidden my-auto">
             <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
 
-            <div class="text-center mb-8 relative z-10">
-                <div
-                    class="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mx-auto mb-5 border border-borderLine shadow-inner transform rotate-3">
+            <div class="text-center mb-6 relative z-10">
+                <div class="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mx-auto mb-5 border border-borderLine shadow-inner transform rotate-3">
                     <i class="fa-solid fa-bolt text-2xl text-primary"></i>
                 </div>
-                <h2 class="text-2xl font-black text-textMain tracking-wide">تسجيل الدخول</h2>
-                <p class="text-textMuted text-sm mt-2">يجب إنشاء حساب أو تسجيل الدخول للبدء</p>
+                <h2 class="text-2xl font-black text-textMain tracking-wide">أهلاً بك في فلو</h2>
+            </div>
+
+            <!-- تبويبات تسجيل الدخول / إنشاء حساب -->
+            <div class="flex bg-background p-1.5 rounded-2xl mb-6 border border-borderLine relative z-10 shadow-inner">
+                <div id="auth-tab-indicator" class="absolute w-[calc(50%-6px)] h-[calc(100%-12px)] top-1.5 bg-surface border border-borderLine rounded-xl transition-all duration-300 right-1.5 shadow-sm transform translate-x-0"></div>
+                <button onclick="switchAuthTab('login')" id="btn-auth-login" class="flex-1 py-2 text-sm font-bold z-10 text-textMain transition-colors">تسجيل الدخول</button>
+                <button onclick="switchAuthTab('register')" id="btn-auth-register" class="flex-1 py-2 text-sm font-bold z-10 text-textMuted transition-colors">إنشاء حساب</button>
             </div>
 
             <div class="space-y-4 relative z-10">
@@ -183,8 +137,7 @@
                     <input type="password" id="setup-password-input" placeholder="كلمة المرور (6 أحرف فأكثر)"
                         class="w-full bg-background border border-borderLine rounded-2xl pr-11 pl-4 py-4 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
                 </div>
-                <button onclick="saveUserProfile()"
-                    class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-4 rounded-2xl transition-all mt-4 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98]">
+                <button onclick="submitAuth()" class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-4 rounded-2xl transition-all mt-2 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98]">
                     <span id="auth-btn-text">دخول مساحة العمل</span>
                     <i class="fa-solid fa-arrow-left text-sm"></i>
                 </button>
@@ -193,25 +146,21 @@
     </div>
 
     <!-- نافذة اختيار المستلم -->
-    <div id="recipient-modal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex-col items-center justify-center p-4 transition-all">
-        <div
-            class="bg-surface border border-borderLine rounded-[2rem] p-6 max-w-md w-full flex flex-col h-[75vh] max-h-[600px] fade-in-up shadow-2xl">
+    <div id="recipient-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex-col items-center justify-center p-4 transition-all">
+        <div class="bg-surface border border-borderLine rounded-[2rem] p-6 max-w-md w-full flex flex-col h-[75vh] max-h-[600px] fade-in-up shadow-2xl">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-textMain">تحديد المستلم</h3>
-                <button onclick="closeRecipientModal()"
-                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-background hover:bg-borderLine text-textMuted transition-colors border border-borderLine">
+                <button onclick="closeRecipientModal()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-background hover:bg-borderLine text-textMuted transition-colors border border-borderLine">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div class="relative mb-4 shrink-0">
                 <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
-                <input type="text" id="recipient-search" placeholder="ابحث في قائمة أصدقائك..."
-                    oninput="filterRecipientModalList()"
+                <input type="text" id="recipient-search" placeholder="ابحث في قائمة أصدقائك..." oninput="filterRecipientModalList()"
                     class="w-full bg-background border border-borderLine rounded-2xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary text-textMain transition-all text-sm">
             </div>
             <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 hide-scrollbar pb-2">
-                <!-- يتم التوليد برمجياً (للأصدقاء فقط) -->
+                <!-- يتم التوليد برمجياً -->
             </div>
         </div>
     </div>
@@ -219,69 +168,48 @@
     <!-- الهيكل الرئيسي -->
     <div class="w-full h-full flex flex-col overflow-hidden relative z-10 bg-background">
 
-        <!-- الهيدر (Header) للديسكتوب والموبايل -->
+        <!-- الهيدر -->
         <header class="w-full flex-none z-30 pt-safe-top px-4 md:px-8 pb-4">
-
-            <div
-                class="max-w-6xl mx-auto bg-surface/80 backdrop-blur-md border border-borderLine rounded-2xl h-16 flex items-center justify-between px-3 md:px-6 shadow-sm">
-
-                <!-- القسم الأيمن: الشعار -->
+            <div class="max-w-6xl mx-auto bg-surface/80 backdrop-blur-md border border-borderLine rounded-2xl h-16 flex items-center justify-between px-3 md:px-6 shadow-sm">
+                <!-- القسم الأيمن -->
                 <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 bg-gradient-to-br from-primary to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-md transform rotate-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-md transform rotate-3">
                         <i class="fa-solid fa-bolt text-sm"></i>
                     </div>
-                    <span class="font-black text-xl tracking-wider text-textMain hidden sm:block">FLOW</span>
+                    <!-- إزالة hidden لإظهار الكلمة في جميع الشاشات -->
+                    <span class="font-black text-xl tracking-wider text-textMain">FLOW</span>
                 </div>
 
-                <!-- القسم الأوسط: التنقل (ديسكتوب فقط) -->
+                <!-- القسم الأوسط: التنقل -->
                 <nav class="hidden md:flex bg-background p-1 rounded-xl border border-borderLine">
-                    <button onclick="navigate('inbox')" id="tab-inbox"
-                        class="nav-active w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الوارد</button>
-                    <button onclick="navigate('outbox')" id="tab-outbox"
-                        class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الصادر</button>
-                    <button onclick="navigate('send')" id="tab-send"
-                        class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">إرسال</button>
-                    <button onclick="navigate('contacts')" id="tab-contacts"
-                        class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الدليل</button>
+                    <button onclick="navigate('inbox')" id="tab-inbox" class="nav-active w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الوارد</button>
+                    <button onclick="navigate('outbox')" id="tab-outbox" class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الصادر</button>
+                    <button onclick="navigate('send')" id="tab-send" class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">إرسال</button>
+                    <button onclick="navigate('contacts')" id="tab-contacts" class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الدليل</button>
                 </nav>
 
-                <!-- القسم الأيسر: البروفايل والخروج والمعرف -->
+                <!-- القسم الأيسر -->
                 <div class="flex items-center gap-2 sm:gap-4">
-                    <!-- معرف المستخدم (Short ID) -->
-                    <div onclick="copyMyShortId()"
-                        class="flex items-center gap-2 bg-background border border-borderLine rounded-lg px-3 py-1.5 cursor-pointer hover:bg-borderLine hover:border-primary/50 transition-all group"
-                        title="انقر لنسخ المعرف الخاص بك لإعطائه لأصدقائك">
-                        <i
-                            class="fa-solid fa-hashtag text-primary text-xs group-hover:scale-110 transition-transform"></i>
+                    <div onclick="copyMyShortId()" class="flex items-center gap-2 bg-background border border-borderLine rounded-lg px-3 py-1.5 cursor-pointer hover:bg-borderLine hover:border-primary/50 transition-all group" title="انقر لنسخ المعرف">
+                        <i class="fa-solid fa-hashtag text-primary text-xs group-hover:scale-110 transition-transform"></i>
                         <span id="my-short-id" class="text-sm font-black text-textMain tracking-widest">-----</span>
                     </div>
-
                     <div class="h-6 w-px bg-borderLine hidden sm:block"></div>
-
-                    <!-- البروفايل -->
                     <div class="flex items-center gap-3 hidden md:flex">
                         <div class="text-left">
-                            <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[90px]">...
-                            </h1>
+                            <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[90px]">...</h1>
                         </div>
-                        <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
-                            class="w-8 h-8 rounded-full border border-borderLine bg-background">
+                        <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-8 h-8 rounded-full border border-borderLine bg-background">
                     </div>
-
-                    <button onclick="logoutUser()"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-background hover:bg-rose-500/10 text-textMuted hover:text-rose-400 transition-colors border border-borderLine shrink-0"
-                        title="تسجيل الخروج">
+                    <button onclick="logoutUser()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-background hover:bg-rose-500/10 text-textMuted hover:text-rose-400 transition-colors border border-borderLine shrink-0">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
-
             </div>
         </header>
 
         <!-- إشعار النسخ -->
-        <div id="copy-toast"
-            class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-accent text-background font-bold px-4 py-2 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+        <div id="copy-toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-accent text-background font-bold px-4 py-2 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
             تم نسخ المعرف بنجاح!
         </div>
 
@@ -326,43 +254,31 @@
                             <h2 class="text-3xl font-black text-textMain mb-2">إرسال ملف</h2>
                             <p class="text-textMuted text-sm">حدد المستلم من قائمة أصدقائك وارفع الملف (حتى 100MB)</p>
                         </div>
-
-                        <div
-                            class="bg-surface border border-borderLine rounded-[2rem] p-5 md:p-8 flex flex-col w-full shadow-lg">
-
-                            <input type="file" id="file-upload-input" class="hidden"
-                                onchange="handleFileSelection(event)"
+                        <div class="bg-surface border border-borderLine rounded-[2rem] p-5 md:p-8 flex flex-col w-full shadow-lg">
+                            <input type="file" id="file-upload-input" class="hidden" onchange="handleFileSelection(event)"
                                 accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar">
 
                             <div id="dropzone" onclick="document.getElementById('file-upload-input').click()"
                                 class="dropzone rounded-[1.5rem] p-8 flex flex-col items-center justify-center cursor-pointer bg-background min-h-[240px] w-full mb-6 group">
                                 <div id="file-preview-area" class="text-center w-full flex flex-col items-center">
-                                    <div
-                                        class="w-20 h-20 rounded-[1rem] bg-surface border border-borderLine flex items-center justify-center text-3xl text-primary mb-4 group-hover:scale-110 transition-transform shadow-sm transform -rotate-3">
+                                    <div class="w-20 h-20 rounded-[1rem] bg-surface border border-borderLine flex items-center justify-center text-3xl text-primary mb-4 group-hover:scale-110 transition-transform shadow-sm transform -rotate-3">
                                         <i class="fa-solid fa-cloud-upload-alt"></i>
                                     </div>
-                                    <h3 class="text-textMain font-bold text-base mb-1" id="file-name-display">انقر أو
-                                        اسحب الملف هنا</h3>
-                                    <span
-                                        class="text-textMuted text-xs bg-surface px-3 py-1 rounded-lg border border-borderLine mt-2">الحد
-                                        الأقصى 100 ميجابايت</span>
+                                    <h3 class="text-textMain font-bold text-base mb-1" id="file-name-display">انقر أو اسحب الملف هنا</h3>
+                                    <span class="text-textMuted text-xs bg-surface px-3 py-1 rounded-lg border border-borderLine mt-2">الحد الأقصى 100 ميجابايت</span>
                                 </div>
                             </div>
 
                             <div class="flex flex-col sm:flex-row gap-3 w-full mt-auto">
                                 <input type="hidden" id="selected-recipient-id">
-
                                 <button id="btn-open-recipient-modal" onclick="openRecipientModal()"
                                     class="flex-1 bg-background border border-borderLine hover:border-primary/50 text-textMain font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-user-plus text-primary"></i>
                                     <span id="recipient-btn-text" class="truncate text-sm">اختيار صديق</span>
                                 </button>
-
                                 <button onclick="submitTransfer()" id="btn-submit-transfer" disabled
                                     class="flex-[1.5] relative overflow-hidden bg-primary hover:bg-primaryHover disabled:bg-surface disabled:text-textMuted disabled:border-borderLine disabled:border disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all min-h-[56px] active:scale-[0.98]">
-                                    <div id="upload-progress-bar"
-                                        class="absolute top-0 right-0 bottom-0 bg-white/20 w-0 transition-all duration-300 z-0">
-                                    </div>
+                                    <div id="upload-progress-bar" class="absolute top-0 right-0 bottom-0 bg-white/20 w-0 transition-all duration-300 z-0"></div>
                                     <div class="relative z-10 flex items-center justify-center gap-2 w-full h-full">
                                         <i id="btn-submit-icon" class="fa-solid fa-paper-plane text-sm"></i>
                                         <span id="btn-submit-text" class="text-sm">إرسال الآن</span>
@@ -373,74 +289,66 @@
                     </div>
                 </div>
 
-                <!-- صفحة الدليل (الجديدة كلياً مع التبويبات) -->
+                <!-- صفحة الدليل -->
                 <div id="page-contacts" class="app-page hidden h-full w-full fade-in-up">
 
-                    <!-- شريط التبويبات (Pill Style) -->
-                    <div
-                        class="bg-surface p-1.5 rounded-[2rem] flex mx-auto max-w-md border border-borderLine mb-8 relative text-sm font-bold shadow-sm">
-                        <div id="contacts-tab-indicator"
-                            class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(50%-6px)] rounded-[1.5rem] transition-all duration-300 shadow bg-background border border-borderLine right-1.5 transform translate-x-0">
-                        </div>
-
-                        <button onclick="switchContactsTab('added')" id="contacts-btn-added"
-                            class="relative flex-1 py-3 z-10 text-textMain transition-colors">
+                    <!-- شريط التبويبات الجديد (تصميم حديث Segmented Control) -->
+                    <div class="bg-background p-1.5 rounded-2xl flex mx-auto w-full max-w-md border border-borderLine mb-8 relative text-sm font-bold shadow-sm">
+                        <div id="contacts-tab-indicator" class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(50%-6px)] rounded-xl transition-all duration-300 shadow-md bg-surface border border-borderLine right-1.5 transform translate-x-0"></div>
+                        <button onclick="switchContactsTab('added')" id="contacts-btn-added" class="relative flex-1 py-3 z-10 text-textMain transition-colors">
                             المستخدمين المضافون
                         </button>
-                        <button onclick="switchContactsTab('add_new')" id="contacts-btn-add_new"
-                            class="relative flex-1 py-3 z-10 text-textMuted transition-colors flex items-center justify-center gap-2">
+                        <button onclick="switchContactsTab('add_new')" id="contacts-btn-add_new" class="relative flex-1 py-3 z-10 text-textMuted transition-colors flex items-center justify-center gap-2">
                             إضافة مستخدمين
-                            <span id="pending-badge"
-                                class="hidden bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full items-center justify-center mb-0.5">0</span>
+                            <span id="pending-badge" class="hidden bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full items-center justify-center mb-0.5 shadow">0</span>
                         </button>
                     </div>
 
                     <!-- القسم الأول: الأصدقاء المضافون -->
-                    <div id="contacts-panel-added" class="w-full">
-                        <div class="relative w-full mb-6">
-                            <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
-                            <input type="text" id="friends-search-input" oninput="renderFriendsList()"
-                                placeholder="ابحث في أصدقائك..."
-                                class="w-full bg-surface border border-borderLine rounded-2xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary text-textMain transition-all text-sm">
+                    <!-- تم إضافة حدث النقر لاكتشاف 3 نقرات -->
+                    <div id="contacts-panel-added" class="w-full relative min-h-[300px]" onclick="handleContactsTap()">
+                        
+                        <!-- العبارة والأيقونة في الخلفية الشفافة -->
+                        <div id="contacts-watermark" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0 mt-20">
+                            <i class="fa-solid fa-magnifying-glass text-5xl mb-3"></i>
+                            <h2 class="text-2xl font-black tracking-wider">اضغط 3 مرات للبحث</h2>
                         </div>
-                        <div id="friends-list-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full pb-6">
+
+                        <!-- شريط البحث (مخفي افتراضياً، يظهر عند النقر 3 مرات) -->
+                        <div id="search-bar-container" class="relative w-full mb-6 z-20 overflow-hidden transition-all duration-500" style="max-height: 0px; opacity: 0;">
+                            <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
+                            <input type="text" id="friends-search-input" oninput="renderFriendsList()" placeholder="ابحث في أصدقائك..."
+                                class="w-full bg-surface border border-borderLine rounded-2xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary text-textMain transition-all text-sm shadow-lg">
+                        </div>
+
+                        <div id="friends-list-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full pb-6 relative z-10">
                             <!-- الأصدقاء هنا -->
                         </div>
                     </div>
 
                     <!-- القسم الثاني: إضافة وطلبات -->
                     <div id="contacts-panel-add_new" class="w-full hidden flex-col gap-8">
-
-                        <!-- صندوق الإضافة برمز -->
                         <div class="bg-surface border border-borderLine rounded-[1.5rem] p-6 shadow-sm">
                             <h3 class="text-lg font-bold text-textMain mb-2">إضافة صديق جديد</h3>
-                            <p class="text-xs text-textMuted mb-4">اطلب من صديقك إعطاءك "المعرف" المكون من 5 أحرف
-                                الموجود أعلى الشاشة لكي تضيفه.</p>
-
+                            <p class="text-xs text-textMuted mb-4">اطلب من صديقك إعطاءك "المعرف" المكون من 5 أحرف الموجود أعلى الشاشة لكي تضيفه.</p>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <div class="relative flex-1">
-                                    <i
-                                        class="fa-solid fa-hashtag absolute right-4 top-1/2 -translate-y-1/2 text-primary"></i>
-                                    <input type="text" id="add-friend-input" placeholder="أدخل رمز المعرف (مثال: A8K2M)"
-                                        maxlength="5"
+                                    <i class="fa-solid fa-hashtag absolute right-4 top-1/2 -translate-y-1/2 text-primary"></i>
+                                    <input type="text" id="add-friend-input" placeholder="أدخل رمز المعرف (مثال: A8K2M)" maxlength="5"
                                         class="w-full bg-background border border-borderLine rounded-xl pr-10 pl-4 py-3.5 focus:outline-none focus:border-primary uppercase text-textMain tracking-widest text-sm font-bold placeholder-textMuted/50 font-sans">
                                 </div>
-                                <button onclick="sendFriendRequest()"
-                                    class="bg-primary hover:bg-primaryHover text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shrink-0">
+                                <button onclick="sendFriendRequest()" class="bg-primary hover:bg-primaryHover text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shrink-0">
                                     <i class="fa-solid fa-user-plus"></i> إرسال طلب
                                 </button>
                             </div>
                         </div>
 
-                        <!-- قائمة الطلبات الواردة -->
                         <div>
-                            <h3 class="text-lg font-bold text-textMain mb-4 border-b border-borderLine pb-2">طلبات
-                                الصداقة الواردة</h3>
+                            <h3 class="text-lg font-bold text-textMain mb-4 border-b border-borderLine pb-2">طلبات الصداقة الواردة</h3>
                             <div id="requests-list-grid" class="grid grid-cols-1 gap-3 w-full pb-6">
                                 <!-- الطلبات هنا -->
                             </div>
                         </div>
-
                     </div>
 
                 </div>
@@ -448,29 +356,23 @@
             </div>
         </main>
 
-        <!-- شريط التنقل السفلي للموبايل (Bottom Nav) -->
-        <nav
-            class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-xl border-t border-borderLine flex justify-around items-center px-2 pt-3 pb-safe-bottom z-40">
-            <button onclick="navigate('inbox')" id="mobile-tab-inbox"
-                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-primary transition-colors">
+        <!-- شريط التنقل السفلي للموبايل -->
+        <nav class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-xl border-t border-borderLine flex justify-around items-center px-2 pt-3 pb-safe-bottom z-40">
+            <button onclick="navigate('inbox')" id="mobile-tab-inbox" class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-primary transition-colors">
                 <i class="fa-solid fa-inbox text-xl"></i>
                 <span class="text-[10px] font-bold">الوارد</span>
             </button>
-            <button onclick="navigate('outbox')" id="mobile-tab-outbox"
-                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors">
+            <button onclick="navigate('outbox')" id="mobile-tab-outbox" class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors">
                 <i class="fa-solid fa-paper-plane text-xl"></i>
                 <span class="text-[10px] font-bold">الصادر</span>
             </button>
-            <button onclick="navigate('send')" id="mobile-tab-send"
-                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors relative">
-                <div
-                    class="absolute -top-8 bg-primary text-white w-14 h-14 rounded-2xl flex items-center justify-center border-4 border-background shadow-lg transform rotate-3">
+            <button onclick="navigate('send')" id="mobile-tab-send" class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors relative">
+                <div class="absolute -top-8 bg-primary text-white w-14 h-14 rounded-2xl flex items-center justify-center border-4 border-background shadow-lg transform rotate-3">
                     <i class="fa-solid fa-plus text-2xl"></i>
                 </div>
                 <span class="text-[10px] font-bold mt-8">إرسال</span>
             </button>
-            <button onclick="navigate('contacts')" id="mobile-tab-contacts"
-                class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors">
+            <button onclick="navigate('contacts')" id="mobile-tab-contacts" class="flex-1 pb-2 flex flex-col items-center gap-1.5 text-textMuted hover:text-textMain transition-colors">
                 <i class="fa-solid fa-users text-xl"></i>
                 <span class="text-[10px] font-bold">الدليل</span>
             </button>
@@ -500,18 +402,18 @@
 
         let myUser = null;
         let usersData = [];
-        let connectionsData = []; // للطلبات والأصدقاء
+        let connectionsData = []; 
         let transfersData = [];
         let currentPage = 'inbox';
         let selectedFile = null;
+        let authMode = 'login'; // login or register
 
         const USERS_PATH = 'users';
         const MESSAGES_PATH = 'messages';
         const CONNECTIONS_PATH = 'connections';
 
-        // 1. توليد كود قصير عشوائي
         function generateShortId() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // بدون I, O, 0, 1 لتجنب التشابه
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
             let result = '';
             for (let i = 0; i < 5; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -519,7 +421,6 @@
             return result;
         }
 
-        // 2. التهيئة 
         onAuthStateChanged(auth, async (user) => {
             const loading = document.getElementById('loading-screen');
             const setupModal = document.getElementById('setup-modal');
@@ -535,7 +436,6 @@
 
                     if (userSnap.exists()) {
                         myUser = { ...userSnap.data(), uid: user.uid };
-                        // الترقية التلقائية للمستخدمين القدامى لإضافة shortId
                         if (!myUser.shortId) {
                             myUser.shortId = generateShortId();
                             await updateDoc(userRef, { shortId: myUser.shortId });
@@ -566,12 +466,33 @@
             signOut(auth);
         };
 
-        window.saveUserProfile = async () => {
+        // تبديل بين الدخول والتسجيل
+        window.switchAuthTab = (mode) => {
+            authMode = mode;
+            const indicator = document.getElementById('auth-tab-indicator');
+            const btnLogin = document.getElementById('btn-auth-login');
+            const btnRegister = document.getElementById('btn-auth-register');
+            const btnSubmit = document.getElementById('auth-btn-text');
+
+            if (mode === 'login') {
+                indicator.style.transform = 'translateX(0)';
+                btnLogin.classList.replace('text-textMuted', 'text-textMain');
+                btnRegister.classList.replace('text-textMain', 'text-textMuted');
+                btnSubmit.innerText = 'دخول مساحة العمل';
+            } else {
+                indicator.style.transform = 'translateX(-100%)';
+                btnRegister.classList.replace('text-textMuted', 'text-textMain');
+                btnLogin.classList.replace('text-textMain', 'text-textMuted');
+                btnSubmit.innerText = 'إنشاء حساب جديد';
+            }
+        };
+
+        window.submitAuth = async () => {
             const nameInput = document.getElementById('setup-name-input').value.trim();
             const passInput = document.getElementById('setup-password-input').value;
 
-            if (!nameInput) return alert('يرجى كتابة اسمك');
-            if (!passInput || passInput.length < 6) return alert('كلمة المرور قصيرة جداً');
+            if (!nameInput) return alert('يرجى كتابة اسم المستخدم');
+            if (!passInput || passInput.length < 6) return alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
 
             const hexName = Array.from(nameInput.toLowerCase()).map(c => c.charCodeAt(0).toString(16)).join('');
             const syntheticEmail = `u_${hexName}@flow.local`;
@@ -581,25 +502,27 @@
             btnText.innerText = 'جاري التحقق...';
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, syntheticEmail, passInput);
-                const user = userCredential.user;
-                const seed = Math.random().toString(36).substring(7);
-                const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=6366f1`;
-                const shortId = generateShortId();
-
-                await setDoc(doc(db, USERS_PATH, user.uid), {
-                    name: nameInput,
-                    avatar: avatarUrl,
-                    shortId: shortId,
-                    timestamp: serverTimestamp()
-                });
+                if (authMode === 'register') {
+                    const userCredential = await createUserWithEmailAndPassword(auth, syntheticEmail, passInput);
+                    const user = userCredential.user;
+                    const seed = Math.random().toString(36).substring(7);
+                    const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=6366f1`;
+                    
+                    await setDoc(doc(db, USERS_PATH, user.uid), {
+                        name: nameInput,
+                        avatar: avatarUrl,
+                        shortId: generateShortId(),
+                        timestamp: serverTimestamp()
+                    });
+                } else {
+                    // Login
+                    await signInWithEmailAndPassword(auth, syntheticEmail, passInput);
+                }
             } catch (err) {
-                if (err.code === 'auth/email-already-in-use') {
-                    try {
-                        await signInWithEmailAndPassword(auth, syntheticEmail, passInput);
-                    } catch (signErr) {
-                        alert('اسم المستخدم موجود مسبقاً بكلمة مرور مختلفة.');
-                    }
+                if (err.code === 'auth/email-already-in-use' && authMode === 'register') {
+                    alert('اسم المستخدم هذا محجوز مسبقاً. الرجاء اختيار اسم آخر أو تسجيل الدخول.');
+                } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                    alert('بيانات الدخول غير صحيحة، أو الحساب غير موجود.');
                 } else {
                     alert('حدث خطأ: ' + err.message);
                 }
@@ -627,7 +550,6 @@
             });
         };
 
-        // 3. التنقل
         window.navigate = (pageId) => {
             ['inbox', 'outbox', 'send', 'contacts'].forEach(id => {
                 const btn = document.getElementById(`tab-${id}`);
@@ -673,11 +595,9 @@
             }
         };
 
-        // 4. جلب البيانات (أضفنا الاستماع للاتصالات Connections)
         function startDataListeners() {
             if (!myUser) return;
 
-            // جلب المستخدمين
             onSnapshot(collection(db, USERS_PATH), (snapshot) => {
                 usersData = [];
                 snapshot.forEach(doc => {
@@ -689,7 +609,6 @@
                 }
             });
 
-            // جلب الطلبات والأصدقاء
             onSnapshot(collection(db, CONNECTIONS_PATH), (snapshot) => {
                 connectionsData = [];
                 let pendingCount = 0;
@@ -703,7 +622,6 @@
                     }
                 });
 
-                // تحديث رقم الطلبات في التبويب
                 const badge = document.getElementById('pending-badge');
                 if (pendingCount > 0) {
                     badge.textContent = pendingCount;
@@ -720,7 +638,6 @@
                 }
             });
 
-            // جلب الملفات
             onSnapshot(collection(db, MESSAGES_PATH), (snapshot) => {
                 transfersData = [];
                 snapshot.forEach(doc => {
@@ -738,7 +655,6 @@
             });
         }
 
-        // --- نظام الأصدقاء (الجديد) ---
         function getMyFriends() {
             const friendUids = connectionsData
                 .filter(c => c.status === 'accepted')
@@ -773,6 +689,38 @@
             renderContactsPage();
         };
 
+        // --- نظام النقر 3 مرات لإظهار البحث ---
+        let tapCount = 0;
+        let tapTimeout;
+        window.handleContactsTap = () => {
+            tapCount++;
+            clearTimeout(tapTimeout);
+            
+            if (tapCount === 3) {
+                // إظهار مربع البحث
+                const searchContainer = document.getElementById('search-bar-container');
+                const watermark = document.getElementById('contacts-watermark');
+                
+                if (searchContainer.style.opacity === '0') {
+                    searchContainer.style.maxHeight = '100px';
+                    searchContainer.style.opacity = '1';
+                    searchContainer.style.marginBottom = '1.5rem';
+                    watermark.style.opacity = '0.05'; // تخفيف الشفافية أكثر
+                    setTimeout(() => document.getElementById('friends-search-input').focus(), 300);
+                } else {
+                    searchContainer.style.maxHeight = '0px';
+                    searchContainer.style.opacity = '0';
+                    searchContainer.style.marginBottom = '0';
+                    watermark.style.opacity = '0.2';
+                    document.getElementById('friends-search-input').value = '';
+                    renderFriendsList();
+                }
+                tapCount = 0;
+            } else {
+                tapTimeout = setTimeout(() => { tapCount = 0; }, 400); // المهلة للنقرات
+            }
+        };
+
         window.renderContactsPage = () => {
             if (currentPage !== 'contacts') return;
             renderFriendsList();
@@ -790,13 +738,13 @@
             container.innerHTML = '';
 
             if (filtered.length === 0) {
-                container.innerHTML = `<p class="text-center text-textMuted/50 py-8 w-full col-span-full text-sm">ليس لديك أصدقاء مضافين بعد.</p>`;
-                return;
+                // container.innerHTML = `<p class="text-center text-textMuted/50 py-8 w-full col-span-full text-sm relative z-10"></p>`;
+                return; // لا نظهر نص هنا لتظل العبارة الشفافة بارزة
             }
 
             filtered.forEach(u => {
                 const html = `
-                    <div class="w-full bg-surface border border-borderLine rounded-2xl p-4 flex flex-row items-center justify-between gap-3 modern-card">
+                    <div class="w-full bg-surface/80 backdrop-blur-md border border-borderLine rounded-2xl p-4 flex flex-row items-center justify-between gap-3 modern-card">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
                             <img src="${u.avatar}" class="w-12 h-12 rounded-full border border-borderLine bg-background shrink-0">
                             <div class="min-w-0">
@@ -804,7 +752,7 @@
                                 <p class="text-[10px] text-textMuted mt-0.5 uppercase tracking-widest">صديق مضاف</p>
                             </div>
                         </div>
-                        <button onclick="selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
+                        <button onclick="event.stopPropagation(); selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
                             class="shrink-0 bg-background border border-borderLine hover:border-primary text-textMain text-xs font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
                             <i class="fa-solid fa-paper-plane text-[10px] text-primary"></i> إرسال
                         </button>
@@ -822,7 +770,7 @@
             const incomingRequests = connectionsData.filter(c => c.receiverId === myUser.uid && c.status === 'pending');
 
             if (incomingRequests.length === 0) {
-                container.innerHTML = `<p class="text-textMuted/50 text-sm py-4">لا توجد طلبات واردة حالياً.</p>`;
+                container.innerHTML = `<p class="text-textMuted/50 text-sm py-4 text-center">لا توجد طلبات واردة حالياً.</p>`;
                 return;
             }
 
@@ -831,7 +779,7 @@
                 if (!senderUser) return;
 
                 const html = `
-                    <div class="w-full bg-background border border-borderLine rounded-xl p-3 flex flex-row items-center justify-between gap-3">
+                    <div class="w-full bg-background border border-borderLine rounded-xl p-3 flex flex-row items-center justify-between gap-3 shadow-sm">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
                             <img src="${senderUser.avatar}" class="w-10 h-10 rounded-full border border-borderLine bg-surface shrink-0">
                             <div class="min-w-0">
@@ -863,7 +811,6 @@
             const targetUser = usersData.find(u => u.shortId === code);
             if (!targetUser) return alert("المستخدم غير موجود، تأكد من الرمز.");
 
-            // التحقق من وجود اتصال مسبق
             const existingConn = connectionsData.find(c =>
                 (c.senderId === myUser.uid && c.receiverId === targetUser.uid) ||
                 (c.receiverId === myUser.uid && c.senderId === targetUser.uid)
@@ -895,20 +842,15 @@
         };
 
         window.acceptRequest = async (connId) => {
-            try {
-                await updateDoc(doc(db, CONNECTIONS_PATH, connId), { status: 'accepted' });
-            } catch (e) { alert("حدث خطأ"); }
+            try { await updateDoc(doc(db, CONNECTIONS_PATH, connId), { status: 'accepted' }); } catch (e) { alert("حدث خطأ"); }
         };
 
         window.rejectRequest = async (connId) => {
             try {
-                if (confirm("هل تريد رفض الطلب؟")) {
-                    await deleteDoc(doc(db, CONNECTIONS_PATH, connId));
-                }
+                if (confirm("هل تريد رفض الطلب؟")) { await deleteDoc(doc(db, CONNECTIONS_PATH, connId)); }
             } catch (e) { alert("حدث خطأ"); }
         };
 
-        // 5. عرض الملفات
         function renderFilesGrid() {
             const isInbox = currentPage === 'inbox';
             const gridId = isInbox ? 'inbox-grid' : 'outbox-grid';
@@ -917,10 +859,7 @@
             if (!container) return;
             container.innerHTML = '';
 
-            const filesToShow = transfersData.filter(f =>
-                isInbox ? f.receiverId === myUser.uid : f.senderId === myUser.uid
-            );
-
+            const filesToShow = transfersData.filter(f => isInbox ? f.receiverId === myUser.uid : f.senderId === myUser.uid);
             document.getElementById(countId).textContent = filesToShow.length;
 
             if (filesToShow.length === 0) {
@@ -989,7 +928,6 @@
             });
         }
 
-        // 6. اختيار المستلم (الآن يبحث فقط في الأصدقاء المضافين)
         window.openRecipientModal = () => {
             document.getElementById('recipient-modal').classList.remove('hidden');
             document.getElementById('recipient-modal').classList.add('flex');
@@ -1055,7 +993,6 @@
             navigate('send');
         };
 
-        // 7. الرفع
         window.handleFileSelection = (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -1113,18 +1050,19 @@
             }
         }
 
+        // تحسين الرفع السريع للصور 
         function compressImage(base64Str, callback) {
             const img = new Image();
             img.src = base64Str;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                let width = img.width; let height = img.height; const MAX_SIZE = 1200;
+                let width = img.width; let height = img.height; const MAX_SIZE = 1000; // تصغير قليلاً لرفع أسرع
                 if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
                 else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
                 canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.8));
+                callback(canvas.toDataURL('image/jpeg', 0.7)); // ضغط الجودة لـ 70% للسرعة الفائقة
             };
         }
 
@@ -1186,10 +1124,13 @@
                             type: 'file_chunked', fileName: file.name, fileSize: sizeStr, timestamp: serverTimestamp()
                         });
 
-                        const chunkSize = 800000;
+                        // -- تحديث السرعة الخارقة (Fast Upload Engine) --
+                        // قمنا بزيادة حجم الحزمة إلى 950 كيلوبايت لتقليل عدد الطلبات
+                        // وقمنا بزيادة الحزم المرفوعة بوقت واحد إلى 15 حزمة
+                        const chunkSize = 950000; 
                         const totalChunks = Math.ceil(base64File.length / chunkSize);
                         let chunksUploaded = 0;
-                        const concurrencyLimit = 5;
+                        const concurrencyLimit = 15; 
 
                         for (let i = 0; i < totalChunks; i += concurrencyLimit) {
                             const batch = [];

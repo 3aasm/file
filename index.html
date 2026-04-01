@@ -161,7 +161,6 @@
         class="fixed inset-0 bg-black/90 backdrop-blur-md z-[90] hidden flex-col items-center justify-center p-4 transition-all">
         <div
             class="bg-surface border border-borderLine rounded-[2rem] p-8 md:p-10 max-w-sm w-full fade-in-up shadow-2xl relative overflow-hidden">
-            <!-- ديكور خلفي -->
             <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
 
             <div class="text-center mb-8 relative z-10">
@@ -207,12 +206,12 @@
             </div>
             <div class="relative mb-4 shrink-0">
                 <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
-                <input type="text" id="recipient-search" placeholder="ابحث في دليل المستخدمين..."
+                <input type="text" id="recipient-search" placeholder="ابحث في قائمة أصدقائك..."
                     oninput="filterRecipientModalList()"
                     class="w-full bg-background border border-borderLine rounded-2xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary text-textMain transition-all text-sm">
             </div>
             <div id="modal-recipient-list" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 hide-scrollbar pb-2">
-                <!-- يتم التوليد برمجياً -->
+                <!-- يتم التوليد برمجياً (للأصدقاء فقط) -->
             </div>
         </div>
     </div>
@@ -221,12 +220,10 @@
     <div class="w-full h-full flex flex-col overflow-hidden relative z-10 bg-background">
 
         <!-- الهيدر (Header) للديسكتوب والموبايل -->
-        <!-- استخدام pt-safe-top لإبعاد الشعار عن البطارية في الجوال -->
         <header class="w-full flex-none z-30 pt-safe-top px-4 md:px-8 pb-4">
 
-            <!-- تصميم الهيدر ككبسولة عائمة (Floating Pill) -->
             <div
-                class="max-w-6xl mx-auto bg-surface/80 backdrop-blur-md border border-borderLine rounded-2xl h-16 flex items-center justify-between px-4 md:px-6 shadow-sm">
+                class="max-w-6xl mx-auto bg-surface/80 backdrop-blur-md border border-borderLine rounded-2xl h-16 flex items-center justify-between px-3 md:px-6 shadow-sm">
 
                 <!-- القسم الأيمن: الشعار -->
                 <div class="flex items-center gap-3">
@@ -234,7 +231,7 @@
                         class="w-8 h-8 bg-gradient-to-br from-primary to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-md transform rotate-3">
                         <i class="fa-solid fa-bolt text-sm"></i>
                     </div>
-                    <span class="font-black text-xl tracking-wider text-textMain">FLOW</span>
+                    <span class="font-black text-xl tracking-wider text-textMain hidden sm:block">FLOW</span>
                 </div>
 
                 <!-- القسم الأوسط: التنقل (ديسكتوب فقط) -->
@@ -249,22 +246,31 @@
                         class="text-textMuted hover:text-textMain w-24 py-1.5 rounded-lg text-sm font-bold transition-all">الدليل</button>
                 </nav>
 
-                <!-- القسم الأيسر: البروفايل والخروج -->
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-3 hidden sm:flex">
-                        <div class="text-left">
-                            <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[100px]">...
-                            </h1>
-                            <p class="text-[10px] text-textMuted font-medium uppercase tracking-wider">متصل الآن</p>
-                        </div>
-                        <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
-                            class="w-9 h-9 rounded-full border border-borderLine bg-background">
+                <!-- القسم الأيسر: البروفايل والخروج والمعرف -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <!-- معرف المستخدم (Short ID) -->
+                    <div onclick="copyMyShortId()"
+                        class="flex items-center gap-2 bg-background border border-borderLine rounded-lg px-3 py-1.5 cursor-pointer hover:bg-borderLine hover:border-primary/50 transition-all group"
+                        title="انقر لنسخ المعرف الخاص بك لإعطائه لأصدقائك">
+                        <i
+                            class="fa-solid fa-hashtag text-primary text-xs group-hover:scale-110 transition-transform"></i>
+                        <span id="my-short-id" class="text-sm font-black text-textMain tracking-widest">-----</span>
                     </div>
 
-                    <div class="w-px h-6 bg-borderLine hidden sm:block"></div>
+                    <div class="h-6 w-px bg-borderLine hidden sm:block"></div>
+
+                    <!-- البروفايل -->
+                    <div class="flex items-center gap-3 hidden md:flex">
+                        <div class="text-left">
+                            <h1 id="my-name-display" class="text-sm font-bold text-textMain truncate max-w-[90px]">...
+                            </h1>
+                        </div>
+                        <img id="my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
+                            class="w-8 h-8 rounded-full border border-borderLine bg-background">
+                    </div>
 
                     <button onclick="logoutUser()"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-background hover:bg-rose-500/10 text-textMuted hover:text-rose-400 transition-colors border border-borderLine"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-background hover:bg-rose-500/10 text-textMuted hover:text-rose-400 transition-colors border border-borderLine shrink-0"
                         title="تسجيل الخروج">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
@@ -273,8 +279,14 @@
             </div>
         </header>
 
+        <!-- إشعار النسخ -->
+        <div id="copy-toast"
+            class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-accent text-background font-bold px-4 py-2 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+            تم نسخ المعرف بنجاح!
+        </div>
+
         <!-- منطقة المحتوى الرئيسية -->
-        <main class="flex-1 relative w-full h-full overflow-y-auto pb-24 md:pb-8"> <!-- مسافة سفلية للموبايل -->
+        <main class="flex-1 relative w-full h-full overflow-y-auto pb-24 md:pb-8">
             <div class="max-w-4xl mx-auto px-4 md:px-8 h-full">
 
                 <!-- صفحة صندوق الوارد -->
@@ -312,13 +324,12 @@
                     <div class="flex flex-col h-full max-w-2xl mx-auto w-full">
                         <div class="text-center mb-8">
                             <h2 class="text-3xl font-black text-textMain mb-2">إرسال ملف</h2>
-                            <p class="text-textMuted text-sm">حدد المستلم وارفع الملف بضغطة واحدة (حتى 100MB)</p>
+                            <p class="text-textMuted text-sm">حدد المستلم من قائمة أصدقائك وارفع الملف (حتى 100MB)</p>
                         </div>
 
                         <div
                             class="bg-surface border border-borderLine rounded-[2rem] p-5 md:p-8 flex flex-col w-full shadow-lg">
 
-                            <!-- منطقة رفع الملف -->
                             <input type="file" id="file-upload-input" class="hidden"
                                 onchange="handleFileSelection(event)"
                                 accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar">
@@ -338,23 +349,20 @@
                                 </div>
                             </div>
 
-                            <!-- الأزرار السفلية -->
                             <div class="flex flex-col sm:flex-row gap-3 w-full mt-auto">
                                 <input type="hidden" id="selected-recipient-id">
 
                                 <button id="btn-open-recipient-modal" onclick="openRecipientModal()"
                                     class="flex-1 bg-background border border-borderLine hover:border-primary/50 text-textMain font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-user-plus text-primary"></i>
-                                    <span id="recipient-btn-text" class="truncate text-sm">اختيار المستلم</span>
+                                    <span id="recipient-btn-text" class="truncate text-sm">اختيار صديق</span>
                                 </button>
 
                                 <button onclick="submitTransfer()" id="btn-submit-transfer" disabled
                                     class="flex-[1.5] relative overflow-hidden bg-primary hover:bg-primaryHover disabled:bg-surface disabled:text-textMuted disabled:border-borderLine disabled:border disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-xl transition-all min-h-[56px] active:scale-[0.98]">
-                                    <!-- شريط التقدم -->
                                     <div id="upload-progress-bar"
                                         class="absolute top-0 right-0 bottom-0 bg-white/20 w-0 transition-all duration-300 z-0">
                                     </div>
-
                                     <div class="relative z-10 flex items-center justify-center gap-2 w-full h-full">
                                         <i id="btn-submit-icon" class="fa-solid fa-paper-plane text-sm"></i>
                                         <span id="btn-submit-text" class="text-sm">إرسال الآن</span>
@@ -365,31 +373,82 @@
                     </div>
                 </div>
 
-                <!-- صفحة جهات الاتصال -->
+                <!-- صفحة الدليل (الجديدة كلياً مع التبويبات) -->
                 <div id="page-contacts" class="app-page hidden h-full w-full fade-in-up">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+
+                    <!-- شريط التبويبات (Pill Style) -->
+                    <div
+                        class="bg-surface p-1.5 rounded-[2rem] flex mx-auto max-w-md border border-borderLine mb-8 relative text-sm font-bold shadow-sm">
+                        <div id="contacts-tab-indicator"
+                            class="absolute h-[calc(100%-12px)] top-1.5 w-[calc(50%-6px)] rounded-[1.5rem] transition-all duration-300 shadow bg-background border border-borderLine right-1.5 transform translate-x-0">
+                        </div>
+
+                        <button onclick="switchContactsTab('added')" id="contacts-btn-added"
+                            class="relative flex-1 py-3 z-10 text-textMain transition-colors">
+                            المستخدمين المضافون
+                        </button>
+                        <button onclick="switchContactsTab('add_new')" id="contacts-btn-add_new"
+                            class="relative flex-1 py-3 z-10 text-textMuted transition-colors flex items-center justify-center gap-2">
+                            إضافة مستخدمين
+                            <span id="pending-badge"
+                                class="hidden bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full items-center justify-center mb-0.5">0</span>
+                        </button>
+                    </div>
+
+                    <!-- القسم الأول: الأصدقاء المضافون -->
+                    <div id="contacts-panel-added" class="w-full">
+                        <div class="relative w-full mb-6">
+                            <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted"></i>
+                            <input type="text" id="friends-search-input" oninput="renderFriendsList()"
+                                placeholder="ابحث في أصدقائك..."
+                                class="w-full bg-surface border border-borderLine rounded-2xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary text-textMain transition-all text-sm">
+                        </div>
+                        <div id="friends-list-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full pb-6">
+                            <!-- الأصدقاء هنا -->
+                        </div>
+                    </div>
+
+                    <!-- القسم الثاني: إضافة وطلبات -->
+                    <div id="contacts-panel-add_new" class="w-full hidden flex-col gap-8">
+
+                        <!-- صندوق الإضافة برمز -->
+                        <div class="bg-surface border border-borderLine rounded-[1.5rem] p-6 shadow-sm">
+                            <h3 class="text-lg font-bold text-textMain mb-2">إضافة صديق جديد</h3>
+                            <p class="text-xs text-textMuted mb-4">اطلب من صديقك إعطاءك "المعرف" المكون من 5 أحرف
+                                الموجود أعلى الشاشة لكي تضيفه.</p>
+
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="relative flex-1">
+                                    <i
+                                        class="fa-solid fa-hashtag absolute right-4 top-1/2 -translate-y-1/2 text-primary"></i>
+                                    <input type="text" id="add-friend-input" placeholder="أدخل رمز المعرف (مثال: A8K2M)"
+                                        maxlength="5"
+                                        class="w-full bg-background border border-borderLine rounded-xl pr-10 pl-4 py-3.5 focus:outline-none focus:border-primary uppercase text-textMain tracking-widest text-sm font-bold placeholder-textMuted/50 font-sans">
+                                </div>
+                                <button onclick="sendFriendRequest()"
+                                    class="bg-primary hover:bg-primaryHover text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shrink-0">
+                                    <i class="fa-solid fa-user-plus"></i> إرسال طلب
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- قائمة الطلبات الواردة -->
                         <div>
-                            <h2 class="text-3xl font-black text-textMain">الدليل</h2>
-                            <p class="text-sm text-textMuted mt-1">جميع مستخدمي المنصة</p>
+                            <h3 class="text-lg font-bold text-textMain mb-4 border-b border-borderLine pb-2">طلبات
+                                الصداقة الواردة</h3>
+                            <div id="requests-list-grid" class="grid grid-cols-1 gap-3 w-full pb-6">
+                                <!-- الطلبات هنا -->
+                            </div>
                         </div>
-                        <div class="relative w-full sm:w-64">
-                            <i
-                                class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
-                            <input type="text" id="contacts-search-input" oninput="renderContactsPage()"
-                                placeholder="بحث بالاسم..."
-                                class="w-full bg-surface border border-borderLine rounded-xl py-3 pr-11 pl-4 text-sm focus:outline-none focus:border-primary text-textMain">
-                        </div>
+
                     </div>
-                    <div id="contacts-page-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full pb-6">
-                        <!-- جهات الاتصال -->
-                    </div>
+
                 </div>
 
             </div>
         </main>
 
         <!-- شريط التنقل السفلي للموبايل (Bottom Nav) -->
-        <!-- استخدام pb-safe-bottom للابتعاد عن خط الايفون السفلي -->
         <nav
             class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-xl border-t border-borderLine flex justify-around items-center px-2 pt-3 pb-safe-bottom z-40">
             <button onclick="navigate('inbox')" id="mobile-tab-inbox"
@@ -423,7 +482,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGweaizMqsiPNXwmVyuk7N96JIQP_UGgU",
@@ -441,14 +500,26 @@
 
         let myUser = null;
         let usersData = [];
+        let connectionsData = []; // للطلبات والأصدقاء
         let transfersData = [];
         let currentPage = 'inbox';
         let selectedFile = null;
 
         const USERS_PATH = 'users';
         const MESSAGES_PATH = 'messages';
+        const CONNECTIONS_PATH = 'connections';
 
-        // 1. التهيئة 
+        // 1. توليد كود قصير عشوائي
+        function generateShortId() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // بدون I, O, 0, 1 لتجنب التشابه
+            let result = '';
+            for (let i = 0; i < 5; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 2. التهيئة 
         onAuthStateChanged(auth, async (user) => {
             const loading = document.getElementById('loading-screen');
             const setupModal = document.getElementById('setup-modal');
@@ -464,6 +535,11 @@
 
                     if (userSnap.exists()) {
                         myUser = { ...userSnap.data(), uid: user.uid };
+                        // الترقية التلقائية للمستخدمين القدامى لإضافة shortId
+                        if (!myUser.shortId) {
+                            myUser.shortId = generateShortId();
+                            await updateDoc(userRef, { shortId: myUser.shortId });
+                        }
                         updateMyProfileUI();
                         startDataListeners();
                     } else {
@@ -509,8 +585,14 @@
                 const user = userCredential.user;
                 const seed = Math.random().toString(36).substring(7);
                 const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=6366f1`;
+                const shortId = generateShortId();
 
-                await setDoc(doc(db, USERS_PATH, user.uid), { name: nameInput, avatar: avatarUrl, timestamp: serverTimestamp() });
+                await setDoc(doc(db, USERS_PATH, user.uid), {
+                    name: nameInput,
+                    avatar: avatarUrl,
+                    shortId: shortId,
+                    timestamp: serverTimestamp()
+                });
             } catch (err) {
                 if (err.code === 'auth/email-already-in-use') {
                     try {
@@ -529,11 +611,24 @@
         function updateMyProfileUI() {
             document.getElementById('my-avatar').src = myUser.avatar;
             document.getElementById('my-name-display').textContent = myUser.name;
+            document.getElementById('my-short-id').textContent = myUser.shortId || '-----';
         }
+
+        window.copyMyShortId = () => {
+            if (!myUser || !myUser.shortId) return;
+            navigator.clipboard.writeText(myUser.shortId).then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+                toast.classList.add('opacity-100', 'translate-y-0');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100', 'translate-y-0');
+                    toast.classList.add('opacity-0', 'translate-y-[-20px]');
+                }, 2000);
+            });
+        };
 
         // 3. التنقل
         window.navigate = (pageId) => {
-            // تحديث تصميم أزرار الديسكتوب
             ['inbox', 'outbox', 'send', 'contacts'].forEach(id => {
                 const btn = document.getElementById(`tab-${id}`);
                 const mobBtn = document.getElementById(`mobile-tab-${id}`);
@@ -557,7 +652,6 @@
                 }
             });
 
-            // تبديل الصفحات
             document.querySelectorAll('.app-page').forEach(page => {
                 page.classList.add('hidden');
                 page.classList.remove('block', 'fade-in-up');
@@ -567,20 +661,23 @@
             targetPage.classList.remove('hidden');
             targetPage.classList.add('block');
 
-            // Trigger reflow
             void targetPage.offsetWidth;
             targetPage.classList.add('fade-in-up');
 
             currentPage = pageId;
 
             if (pageId === 'inbox' || pageId === 'outbox') renderFilesGrid();
-            if (pageId === 'contacts') renderContactsPage();
+            if (pageId === 'contacts') {
+                window.switchContactsTab('added');
+                renderContactsPage();
+            }
         };
 
-        // 4. جلب البيانات
+        // 4. جلب البيانات (أضفنا الاستماع للاتصالات Connections)
         function startDataListeners() {
             if (!myUser) return;
 
+            // جلب المستخدمين
             onSnapshot(collection(db, USERS_PATH), (snapshot) => {
                 usersData = [];
                 snapshot.forEach(doc => {
@@ -592,6 +689,38 @@
                 }
             });
 
+            // جلب الطلبات والأصدقاء
+            onSnapshot(collection(db, CONNECTIONS_PATH), (snapshot) => {
+                connectionsData = [];
+                let pendingCount = 0;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.senderId === myUser.uid || data.receiverId === myUser.uid) {
+                        connectionsData.push({ ...data, id: doc.id });
+                        if (data.receiverId === myUser.uid && data.status === 'pending') {
+                            pendingCount++;
+                        }
+                    }
+                });
+
+                // تحديث رقم الطلبات في التبويب
+                const badge = document.getElementById('pending-badge');
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                } else {
+                    badge.classList.add('hidden');
+                    badge.classList.remove('flex');
+                }
+
+                if (currentPage === 'contacts') renderContactsPage();
+                if (!document.getElementById('recipient-modal').classList.contains('hidden')) {
+                    renderRecipientModalList();
+                }
+            });
+
+            // جلب الملفات
             onSnapshot(collection(db, MESSAGES_PATH), (snapshot) => {
                 transfersData = [];
                 snapshot.forEach(doc => {
@@ -609,7 +738,177 @@
             });
         }
 
-        // 5. عرض الملفات (أفقي متجاوب ومطابق للصورة)
+        // --- نظام الأصدقاء (الجديد) ---
+        function getMyFriends() {
+            const friendUids = connectionsData
+                .filter(c => c.status === 'accepted')
+                .map(c => c.senderId === myUser.uid ? c.receiverId : c.senderId);
+            return usersData.filter(u => friendUids.includes(u.uid));
+        }
+
+        window.switchContactsTab = (tab) => {
+            const indicator = document.getElementById('contacts-tab-indicator');
+            const btnAdded = document.getElementById('contacts-btn-added');
+            const btnAddNew = document.getElementById('contacts-btn-add_new');
+            const panelAdded = document.getElementById('contacts-panel-added');
+            const panelAddNew = document.getElementById('contacts-panel-add_new');
+
+            if (tab === 'added') {
+                indicator.style.transform = 'translateX(0)';
+                btnAdded.classList.replace('text-textMuted', 'text-textMain');
+                btnAddNew.classList.replace('text-textMain', 'text-textMuted');
+                panelAddNew.classList.add('hidden');
+                panelAddNew.classList.remove('flex');
+                panelAdded.classList.remove('hidden');
+                panelAdded.classList.add('block');
+            } else {
+                indicator.style.transform = 'translateX(-100%)';
+                btnAddNew.classList.replace('text-textMuted', 'text-textMain');
+                btnAdded.classList.replace('text-textMain', 'text-textMuted');
+                panelAdded.classList.add('hidden');
+                panelAdded.classList.remove('block');
+                panelAddNew.classList.remove('hidden');
+                panelAddNew.classList.add('flex');
+            }
+            renderContactsPage();
+        };
+
+        window.renderContactsPage = () => {
+            if (currentPage !== 'contacts') return;
+            renderFriendsList();
+            renderRequestsList();
+        };
+
+        window.renderFriendsList = () => {
+            const container = document.getElementById('friends-list-grid');
+            if (!container) return;
+            const searchQ = document.getElementById('friends-search-input').value.toLowerCase();
+
+            const myFriends = getMyFriends();
+            const filtered = myFriends.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
+
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-center text-textMuted/50 py-8 w-full col-span-full text-sm">ليس لديك أصدقاء مضافين بعد.</p>`;
+                return;
+            }
+
+            filtered.forEach(u => {
+                const html = `
+                    <div class="w-full bg-surface border border-borderLine rounded-2xl p-4 flex flex-row items-center justify-between gap-3 modern-card">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <img src="${u.avatar}" class="w-12 h-12 rounded-full border border-borderLine bg-background shrink-0">
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-textMain text-sm truncate">${u.name}</h3>
+                                <p class="text-[10px] text-textMuted mt-0.5 uppercase tracking-widest">صديق مضاف</p>
+                            </div>
+                        </div>
+                        <button onclick="selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
+                            class="shrink-0 bg-background border border-borderLine hover:border-primary text-textMain text-xs font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-[10px] text-primary"></i> إرسال
+                        </button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        };
+
+        window.renderRequestsList = () => {
+            const container = document.getElementById('requests-list-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const incomingRequests = connectionsData.filter(c => c.receiverId === myUser.uid && c.status === 'pending');
+
+            if (incomingRequests.length === 0) {
+                container.innerHTML = `<p class="text-textMuted/50 text-sm py-4">لا توجد طلبات واردة حالياً.</p>`;
+                return;
+            }
+
+            incomingRequests.forEach(req => {
+                const senderUser = usersData.find(u => u.uid === req.senderId);
+                if (!senderUser) return;
+
+                const html = `
+                    <div class="w-full bg-background border border-borderLine rounded-xl p-3 flex flex-row items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <img src="${senderUser.avatar}" class="w-10 h-10 rounded-full border border-borderLine bg-surface shrink-0">
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-textMain text-sm truncate">${senderUser.name}</h3>
+                                <p class="text-[10px] text-textMuted mt-0.5">يريد إضافتك</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="acceptRequest('${req.id}')" class="w-9 h-9 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg flex items-center justify-center transition-colors border border-primary/20">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button onclick="rejectRequest('${req.id}')" class="w-9 h-9 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-lg flex items-center justify-center transition-colors border border-rose-500/20">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        };
+
+        window.sendFriendRequest = async () => {
+            const codeInput = document.getElementById('add-friend-input');
+            const code = codeInput.value.trim().toUpperCase();
+
+            if (code.length !== 5) return alert("الرمز يجب أن يكون 5 أحرف.");
+            if (code === myUser.shortId) return alert("لا يمكنك إضافة نفسك.");
+
+            const targetUser = usersData.find(u => u.shortId === code);
+            if (!targetUser) return alert("المستخدم غير موجود، تأكد من الرمز.");
+
+            // التحقق من وجود اتصال مسبق
+            const existingConn = connectionsData.find(c =>
+                (c.senderId === myUser.uid && c.receiverId === targetUser.uid) ||
+                (c.receiverId === myUser.uid && c.senderId === targetUser.uid)
+            );
+
+            if (existingConn) {
+                if (existingConn.status === 'accepted') return alert("هذا المستخدم مضاف لديك بالفعل.");
+                if (existingConn.status === 'pending') return alert("يوجد طلب معلق بالفعل بينكما.");
+            }
+
+            try {
+                const btn = event.currentTarget;
+                const origHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                await addDoc(collection(db, CONNECTIONS_PATH), {
+                    senderId: myUser.uid,
+                    receiverId: targetUser.uid,
+                    status: 'pending',
+                    timestamp: serverTimestamp()
+                });
+
+                codeInput.value = '';
+                alert("تم إرسال الطلب بنجاح.");
+                btn.innerHTML = origHtml;
+            } catch (err) {
+                alert("خطأ: " + err.message);
+            }
+        };
+
+        window.acceptRequest = async (connId) => {
+            try {
+                await updateDoc(doc(db, CONNECTIONS_PATH, connId), { status: 'accepted' });
+            } catch (e) { alert("حدث خطأ"); }
+        };
+
+        window.rejectRequest = async (connId) => {
+            try {
+                if (confirm("هل تريد رفض الطلب؟")) {
+                    await deleteDoc(doc(db, CONNECTIONS_PATH, connId));
+                }
+            } catch (e) { alert("حدث خطأ"); }
+        };
+
+        // 5. عرض الملفات
         function renderFilesGrid() {
             const isInbox = currentPage === 'inbox';
             const gridId = isInbox ? 'inbox-grid' : 'outbox-grid';
@@ -649,7 +948,6 @@
                 let fileSizeDisplay = file.fileSize || 'مضغوطة';
                 let actionHtml = '';
 
-                // الألوان مطابقة للصورة المرفقة
                 if (file.type === 'image') {
                     iconHtml = `<div class="w-12 h-12 bg-[#1a2332] text-[#60a5fa] rounded-[14px] flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
                     actionHtml = `<a href="${file.fileUrl}" download="image.jpg" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-sm font-bold py-2.5 px-6 rounded-xl transition-colors flex items-center gap-2 shrink-0"><i class="fa-solid fa-download"></i> تحميل</a>`;
@@ -658,11 +956,8 @@
                     actionHtml = `<button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-sm font-bold py-2.5 px-6 rounded-xl transition-all flex items-center gap-2 shrink-0"><i class="fa-solid fa-download"></i> تحميل</button>`;
                 }
 
-                // تصميم البطاقة الأفقية المدمجة
                 const cardHtml = `
                     <div class="modern-card w-full bg-surface border border-borderLine rounded-[1.25rem] p-3 md:p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 overflow-hidden">
-                        
-                        <!-- القسم الأيمن: الأيقونة واسم الملف -->
                         <div class="flex items-center gap-4 w-full lg:w-[35%] min-w-0">
                             ${iconHtml}
                             <div class="flex flex-col min-w-0">
@@ -673,11 +968,7 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- القسم الأيسر: المستخدم، التاريخ، زر التحميل -->
                         <div class="flex items-center justify-between w-full lg:w-[65%] gap-4 pt-3 lg:pt-0 border-t lg:border-0 border-borderLine shrink-0">
-                            
-                            <!-- المستخدم -->
                             <div class="flex items-center gap-3 w-[45%] lg:w-[35%]">
                                 <img src="${otherUser.avatar}" class="w-9 h-9 rounded-full border border-borderLine bg-background shrink-0">
                                 <div class="flex flex-col min-w-0">
@@ -685,13 +976,9 @@
                                     <p class="text-xs font-bold text-textMain truncate">${otherUser.name}</p>
                                 </div>
                             </div>
-                            
-                            <!-- التاريخ -->
                             <div class="hidden lg:flex w-[25%] justify-center">
                                 <p class="text-[11px] text-textMuted font-medium">${timeStr.replace(', ', '<br>')}</p>
                             </div>
-                            
-                            <!-- زر التحميل -->
                             <div class="flex justify-end w-[55%] lg:w-[40%]">
                                 ${actionHtml}
                             </div>
@@ -702,7 +989,7 @@
             });
         }
 
-        // 6. اختيار المستلم
+        // 6. اختيار المستلم (الآن يبحث فقط في الأصدقاء المضافين)
         window.openRecipientModal = () => {
             document.getElementById('recipient-modal').classList.remove('hidden');
             document.getElementById('recipient-modal').classList.add('flex');
@@ -725,10 +1012,11 @@
             if (!list) return;
             list.innerHTML = '';
 
-            const filtered = usersData.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
+            const myFriends = getMyFriends();
+            const filtered = myFriends.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
 
             if (filtered.length === 0) {
-                list.innerHTML = `<p class="text-sm text-textMuted text-center py-6">لا توجد نتائج</p>`;
+                list.innerHTML = `<p class="text-sm text-textMuted text-center py-6">ليس لديك أصدقاء لعرضهم، قم بإضافة أصدقاء من الدليل.</p>`;
                 return;
             }
 
@@ -767,7 +1055,7 @@
             navigate('send');
         };
 
-        // 7. الرفع المسرع
+        // 7. الرفع
         window.handleFileSelection = (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -953,7 +1241,7 @@
 
         function finishTransfer() {
             document.getElementById('selected-recipient-id').value = '';
-            document.getElementById('recipient-btn-text').innerHTML = 'تحديد المستلم';
+            document.getElementById('recipient-btn-text').innerHTML = 'اختيار صديق';
             window.clearFileSelection();
             resetSendUI();
             navigate('outbox');
@@ -986,42 +1274,6 @@
             } finally {
                 if (btn) btn.innerHTML = originalHtml;
             }
-        };
-
-        // 8. دليل المستخدمين
-        window.renderContactsPage = () => {
-            if (currentPage !== 'contacts') return;
-            const container = document.getElementById('contacts-page-grid');
-            if (!container) return;
-            const searchQ = document.getElementById('contacts-search-input').value.toLowerCase();
-            container.innerHTML = '';
-
-            const filtered = usersData.filter(u => u.name && u.name.toLowerCase().includes(searchQ));
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<p class="text-center text-textMuted py-10 w-full col-span-full">لا يوجد بيانات.</p>`;
-                return;
-            }
-
-            filtered.forEach(u => {
-                const html = `
-                    <div class="w-full bg-surface border border-borderLine rounded-2xl p-4 flex flex-row items-center justify-between gap-3 modern-card">
-                        <div class="flex items-center gap-3 flex-1 min-w-0">
-                            <img src="${u.avatar}" class="w-12 h-12 rounded-full border border-borderLine bg-background shrink-0">
-                            <div class="min-w-0">
-                                <h3 class="font-bold text-textMain text-sm truncate">${u.name}</h3>
-                                <p class="text-[10px] text-textMuted mt-0.5">مستخدم المنصة</p>
-                            </div>
-                        </div>
-
-                        <button onclick="selectRecipientAndGo('${u.uid}', '${u.name}', '${u.avatar}')" 
-                            class="shrink-0 bg-background border border-borderLine hover:border-primary text-textMain text-xs font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-paper-plane text-[10px] text-primary"></i> إرسال
-                        </button>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', html);
-            });
         };
 
         const dropzone = document.getElementById('dropzone');

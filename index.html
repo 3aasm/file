@@ -1018,47 +1018,46 @@
                 let actionHtml = '';
 
                 if (file.type === 'image') {
-                    iconHtml = `<div class="w-12 h-12 bg-[#1a2332] text-[#60a5fa] rounded-[14px] flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-image"></i></div>`;
+                    iconHtml = `<div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#1a2332] text-[#60a5fa] rounded-xl sm:rounded-[14px] flex items-center justify-center text-lg sm:text-xl shrink-0 border border-[#60a5fa]/20 shadow-inner"><i class="fa-solid fa-image"></i></div>`;
                     actionHtml = `
-                        <div class="flex gap-1 sm:gap-2">
-                            <button onclick="openImageFile('${file.fileUrl}')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs font-bold py-2 px-3 sm:px-4 rounded-xl transition-colors flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-eye"></i> فتح</button>
-                            <a href="${file.fileUrl}" download="image.jpg" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs font-bold py-2 px-3 sm:px-4 rounded-xl transition-colors flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-download"></i> تنزيل</a>
-                        </div>
+                        <button onclick="openImageFile('${file.fileUrl}')" class="w-9 h-9 sm:w-11 sm:h-11 bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] rounded-lg sm:rounded-xl transition-colors flex items-center justify-center shrink-0 shadow-sm" title="فتح"><i class="fa-solid fa-eye text-sm sm:text-lg"></i></button>
+                        <button onclick="downloadImage('${file.fileUrl}', '${fileNameDisplay}')" class="w-9 h-9 sm:w-11 sm:h-11 bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] rounded-lg sm:rounded-xl transition-colors flex items-center justify-center shrink-0 shadow-sm" title="تنزيل"><i class="fa-solid fa-download text-sm sm:text-lg"></i></button>
                     `;
                 } else if (file.type === 'file_chunked') {
-                    iconHtml = `<div class="w-12 h-12 bg-[#172621] text-[#22c55e] rounded-[14px] flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-file-lines"></i></div>`;
+                    iconHtml = `<div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#172621] text-[#22c55e] rounded-xl sm:rounded-[14px] flex items-center justify-center text-lg sm:text-xl shrink-0 border border-[#22c55e]/20 shadow-inner"><i class="fa-solid fa-file-lines"></i></div>`;
                     actionHtml = `
-                        <div class="flex gap-1 sm:gap-2">
-                            <button id="open-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}', 'open')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs font-bold py-2 px-3 sm:px-4 rounded-xl transition-all flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-eye"></i> فتح</button>
-                            <button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}', 'download')" class="bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] text-xs font-bold py-2 px-3 sm:px-4 rounded-xl transition-all flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-download"></i> تنزيل</button>
-                        </div>
+                        <button id="open-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}', 'open')" class="w-9 h-9 sm:w-11 sm:h-11 bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] rounded-lg sm:rounded-xl transition-colors flex items-center justify-center shrink-0 shadow-sm" title="فتح"><i class="fa-solid fa-eye text-sm sm:text-lg"></i></button>
+                        <button id="dl-btn-${file.id}" onclick="downloadChunkedFile('${file.id}', '${fileNameDisplay}', 'download')" class="w-9 h-9 sm:w-11 sm:h-11 bg-[#1e1b2e] hover:bg-[#2a2640] border border-[#3b3559] text-[#818cf8] rounded-lg sm:rounded-xl transition-all flex items-center justify-center shrink-0 shadow-sm" title="تنزيل"><i class="fa-solid fa-download text-sm sm:text-lg"></i></button>
                     `;
                 }
 
                 const cardHtml = `
-                    <div class="modern-card w-full bg-surface border border-borderLine rounded-[1.25rem] p-3 md:p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 overflow-hidden">
-                        <div class="flex items-center gap-4 w-full lg:w-[35%] min-w-0">
+                    <div class="modern-card w-full bg-surface border border-borderLine rounded-[1rem] sm:rounded-[1.25rem] p-2.5 sm:p-4 flex flex-row items-center justify-between gap-2 overflow-hidden shadow-sm">
+                        <!-- القسم الأيمن: الأيقونة والاسم -->
+                        <div class="flex items-center gap-2 sm:gap-4 w-[55%] sm:w-[40%] shrink-0 min-w-0">
                             ${iconHtml}
-                            <div class="flex flex-col min-w-0">
-                                <h4 class="font-bold text-textMain text-[15px] truncate w-full" title="${fileNameDisplay}">${fileNameDisplay}</h4>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-bold text-textMuted bg-background px-2 py-0.5 rounded border border-borderLine">${fileSizeDisplay}</span>
-                                    <span class="text-[10px] text-textMuted/60 lg:hidden">• ${timeStr}</span>
+                            <div class="flex flex-col min-w-0 flex-1 justify-center">
+                                <h4 class="font-bold text-textMain text-xs sm:text-[15px] truncate w-full" dir="auto" title="${fileNameDisplay}">${fileNameDisplay}</h4>
+                                <div class="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+                                    <span class="text-[8px] sm:text-[10px] font-bold text-textMuted bg-background px-1.5 sm:px-2 py-0.5 rounded border border-borderLine whitespace-nowrap">${fileSizeDisplay}</span>
+                                    <span class="text-[8px] sm:text-[10px] text-textMuted/60 hidden sm:inline-block truncate">• ${timeStr}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between w-full lg:w-[65%] gap-4 pt-3 lg:pt-0 border-t lg:border-0 border-borderLine shrink-0">
-                            <div class="flex items-center gap-3 w-[45%] lg:w-[35%]">
-                                <img src="${otherUser.avatar}" class="w-9 h-9 rounded-full border border-borderLine bg-background shrink-0">
-                                <div class="flex flex-col min-w-0">
+
+                        <!-- القسم الأيسر: المستخدم والأزرار -->
+                        <div class="flex items-center justify-end gap-1.5 sm:gap-4 w-[45%] sm:w-[60%] shrink-0">
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div class="hidden md:flex flex-col items-end min-w-0">
                                     <p class="text-[9px] text-textMuted tracking-wider">${isInbox ? 'مُرسل من:' : 'مُرسل إلى:'}</p>
-                                    <p class="text-xs font-bold text-textMain truncate">${otherUser.name}</p>
+                                    <p class="text-xs font-bold text-textMain truncate max-w-[80px]">${otherUser.name}</p>
                                 </div>
+                                <img src="${otherUser.avatar}" class="w-7 h-7 sm:w-9 h-9 rounded-full border border-borderLine bg-background shrink-0" title="${otherUser.name}">
                             </div>
-                            <div class="hidden lg:flex w-[25%] justify-center">
-                                <p class="text-[11px] text-textMuted font-medium">${timeStr.replace(', ', '<br>')}</p>
-                            </div>
-                            <div class="flex justify-end w-[55%] lg:w-[40%]">
+                            
+                            <div class="hidden sm:block h-6 w-px bg-borderLine shrink-0 mx-1"></div>
+                            
+                            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                 ${actionHtml}
                             </div>
                         </div>
@@ -1319,6 +1318,15 @@
             btnText.innerText = 'إرسال الآن';
             checkSendReady();
         }
+
+        window.downloadImage = (fileUrl, fileName) => {
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileName || 'image.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
 
         function finishTransfer() {
             document.getElementById('selected-recipient-id').value = '';

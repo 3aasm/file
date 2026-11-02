@@ -408,32 +408,43 @@
     <!-- ========================================================================= -->
     <div class="flex-1 flex flex-col h-full overflow-hidden bg-background relative">
 
-        <!-- شريط علوي للهاتف فقط (بدون ضبابية، خلفية صلبة واضحة) -->
-        <header class="md:hidden flex items-center justify-between px-4 pt-safe pb-3 bg-surface border-b border-borderLine z-30 shrink-0">
-            <div class="flex items-center gap-2.5">
-                <img src="123.png" alt="FLOW" class="w-8 h-8 rounded-xl object-cover border border-borderLine bg-background" onerror="this.style.display='none'">
-                <img id="mob-my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-9 h-9 rounded-full border border-borderLine bg-background">
-                <div>
-                    <h1 id="mob-my-name" class="text-xs font-bold text-textMain leading-tight truncate max-w-[110px]">...</h1>
-                    <span class="text-[10px] text-textMuted block">تطبيق فلو</span>
+        <!-- شريط علوي للهاتف فقط (يبدو كتطبيق جوال أصلي مع تثبيت اسم الصفحة) -->
+        <header class="md:hidden flex flex-col bg-surface/95 backdrop-blur-xl border-b border-borderLine z-30 shrink-0">
+            <div class="flex items-center justify-between px-4 pt-safe pb-2.5">
+                <div class="flex items-center gap-2.5">
+                    <img src="123.png" alt="FLOW" class="w-8 h-8 rounded-xl object-cover border border-borderLine bg-background" onerror="this.style.display='none'">
+                    <img id="mob-my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-9 h-9 rounded-full border border-borderLine bg-background">
+                    <div>
+                        <h1 id="mob-my-name" class="text-xs font-bold text-textMain leading-tight truncate max-w-[110px]">...</h1>
+                        <span class="text-[10px] text-textMuted block">تطبيق فلو</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- زر نسخ المعرف للهاتف -->
+                    <button onclick="copyMyShortId()" class="flex items-center gap-1.5 bg-surfaceCard border border-borderLine rounded-xl px-3 py-1.5 active:scale-95 transition-transform">
+                        <span class="text-[10px] text-textMuted">معرفي:</span>
+                        <span id="mob-my-id" class="text-xs font-mono font-black text-primary tracking-wider">-----</span>
+                        <i class="fa-regular fa-copy text-[10px] text-textMuted"></i>
+                    </button>
+                    <button onclick="logoutUser()" class="w-8 h-8 rounded-xl bg-surfaceCard border border-borderLine flex items-center justify-center text-textMuted active:text-rose-400">
+                        <i class="fa-solid fa-power-off text-xs"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <!-- زر نسخ المعرف للهاتف -->
-                <button onclick="copyMyShortId()" class="flex items-center gap-1.5 bg-surfaceCard border border-borderLine rounded-xl px-3 py-1.5 active:scale-95 transition-transform">
-                    <span class="text-[10px] text-textMuted">معرفي:</span>
-                    <span id="mob-my-id" class="text-xs font-mono font-black text-primary tracking-wider">-----</span>
-                    <i class="fa-regular fa-copy text-[10px] text-textMuted"></i>
-                </button>
-                <button onclick="logoutUser()" class="w-8 h-8 rounded-xl bg-surfaceCard border border-borderLine flex items-center justify-center text-textMuted active:text-rose-400">
-                    <i class="fa-solid fa-power-off text-xs"></i>
-                </button>
+            <!-- شريط اسم الصفحة المثبت للهاتف (لا يختفي عند التمرير للأسفل) -->
+            <div class="flex items-center justify-between px-4 py-2.5 bg-background/60 border-t border-borderLine/60">
+                <div>
+                    <h2 id="mob-page-title" class="text-lg font-black text-textMain leading-tight">صندوق الوارد</h2>
+                    <p id="mob-page-subtitle" class="text-[11px] text-textMuted">جميع الملفات والصور المستلمة من أصدقائك</p>
+                </div>
+                <span id="mob-header-badge" class="bg-surfaceCard border border-borderLine text-primary font-black text-xs px-3 py-1.5 rounded-xl shrink-0">0 ملف</span>
             </div>
         </header>
 
-        <!-- شريط علوي للكمبيوتر فقط (بدون ضبابية، خلفية صلبة واضحة) -->
-        <header class="hidden md:flex items-center justify-between px-8 py-5 border-b border-borderLine bg-surface shrink-0">
+        <!-- شريط علوي للكمبيوتر فقط (يعرض عنوان القسم وسرعة النقل ومثبت بالأعلى) -->
+        <header class="hidden md:flex items-center justify-between px-8 py-5 border-b border-borderLine bg-surface/90 backdrop-blur-md z-30 shrink-0">
             <div>
                 <h2 id="desktop-page-title" class="text-2xl font-black text-textMain">صندوق الوارد</h2>
                 <p id="desktop-page-subtitle" class="text-xs text-textMuted mt-0.5">جميع الملفات والصور المستلمة من أصدقائك</p>

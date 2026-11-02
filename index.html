@@ -132,13 +132,53 @@
             border-right: 3px solid #6366f1;
         }
 
-        /* Mobile Bottom Bar Active State */
-        .mob-nav-btn.active {
-            color: #6366f1;
+        /* ==================== Mobile Floating Glass Pill Bar (مطابق للصورة تماماً) ==================== */
+        .mob-glass-pill {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 
+                0 20px 40px -10px rgba(0, 0, 0, 0.7),
+                inset 0 1px 1px rgba(255, 255, 255, 0.25),
+                inset 0 -1px 1px rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            padding: 7px;
         }
-        .mob-nav-btn.active .mob-icon-box {
-            background-color: rgba(99, 102, 241, 0.15);
-            transform: translateY(-2px);
+
+        .mob-nav-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 54px;
+            border-radius: 9999px;
+            color: rgba(255, 255, 255, 0.62);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            flex: 1;
+        }
+
+        .mob-nav-btn:not(.active):hover,
+        .mob-nav-btn:not(.active):active {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* الكبسولة الداخلية للتبويب النشط */
+        .mob-nav-btn.active {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .mob-nav-btn .tab-icon {
+            font-size: 21px;
+            transition: transform 0.25s ease, color 0.25s ease;
+        }
+
+        .mob-nav-btn.active .tab-icon {
+            transform: scale(1.08);
+            filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.25));
         }
     </style>
 </head>
@@ -189,34 +229,75 @@
                 <p class="text-xs text-textMuted mt-1">شارك ملفاتك بسرعة البرق وبكل بساطة</p>
             </div>
 
-            <!-- التبويبات -->
-            <div class="grid grid-cols-2 bg-background p-1.5 rounded-2xl mb-6 border border-borderLine relative z-10">
-                <button onclick="switchAuthTab('login')" id="btn-auth-login" class="py-2.5 rounded-xl text-sm font-bold transition-all bg-surfaceCard text-textMain shadow">تسجيل الدخول</button>
-                <button onclick="switchAuthTab('register')" id="btn-auth-register" class="py-2.5 rounded-xl text-sm font-bold transition-all text-textMuted hover:text-textMain">إنشاء حساب</button>
+            <!-- قسم الحسابات المحفوظة (يظهر عند وجود حساب محفوظ) -->
+            <div id="saved-accounts-view" class="hidden space-y-4 relative z-10">
+                <div class="flex items-center justify-between px-1">
+                    <span class="text-xs font-bold text-textMuted">الحسابات المحفوظة على هذا الجهاز</span>
+                    <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-lg font-bold">دخول سريع</span>
+                </div>
+                
+                <div id="saved-accounts-list" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                    <!-- يتم توليد بطاقات الحسابات المحفوظة هنا -->
+                </div>
+
+                <div class="pt-2 border-t border-borderLine">
+                    <button onclick="showManualAuthForm()" class="w-full bg-background hover:bg-white/[0.03] text-textMain border border-borderLine font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+                        <i class="fa-solid fa-user-plus text-primary"></i>
+                        <span>الدخول بحساب آخر أو إنشاء حساب</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="space-y-4 relative z-10">
-                <div>
-                    <label class="block text-xs font-bold text-textMuted mb-1.5 mr-1">اسم المستخدم</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
-                        <input type="text" id="setup-name-input" placeholder="اكتب اسمك هنا..."
-                            class="w-full bg-background border border-borderLine rounded-xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-textMuted mb-1.5 mr-1">كلمة المرور</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
-                        <input type="password" id="setup-password-input" placeholder="6 أحرف أو أرقام على الأقل"
-                            class="w-full bg-background border border-borderLine rounded-xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
-                    </div>
-                </div>
-                <button onclick="submitAuth()" id="auth-submit-btn"
-                    class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-4 rounded-xl transition-all mt-2 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.99]">
-                    <span id="auth-btn-text">دخول للحساب</span>
-                    <i class="fa-solid fa-arrow-left text-sm"></i>
+            <!-- نموذج تسجيل الدخول / إنشاء حساب اليدوي -->
+            <div id="manual-auth-view" class="relative z-10">
+                <!-- زر العودة للحسابات المحفوظة إن وجدت -->
+                <button id="back-to-saved-btn" onclick="showSavedAccountsView()" class="hidden w-full mb-4 bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 font-bold py-2.5 px-4 rounded-xl transition-all items-center justify-center gap-2 text-xs">
+                    <i class="fa-solid fa-users"></i>
+                    <span>العودة للحسابات المحفوظة</span>
                 </button>
+
+                <!-- التبويبات -->
+                <div class="grid grid-cols-2 bg-background p-1.5 rounded-2xl mb-6 border border-borderLine relative z-10">
+                    <button onclick="switchAuthTab('login')" id="btn-auth-login" class="py-2.5 rounded-xl text-sm font-bold transition-all bg-surfaceCard text-textMain shadow">تسجيل الدخول</button>
+                    <button onclick="switchAuthTab('register')" id="btn-auth-register" class="py-2.5 rounded-xl text-sm font-bold transition-all text-textMuted hover:text-textMain">إنشاء حساب</button>
+                </div>
+
+                <div class="space-y-4 relative z-10">
+                    <div>
+                        <label class="block text-xs font-bold text-textMuted mb-1.5 mr-1">اسم المستخدم</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
+                            <input type="text" id="setup-name-input" placeholder="اكتب اسمك هنا..."
+                                class="w-full bg-background border border-borderLine rounded-xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-textMuted mb-1.5 mr-1">كلمة المرور</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-textMuted text-sm"></i>
+                            <input type="password" id="setup-password-input" placeholder="6 أحرف أو أرقام على الأقل"
+                                class="w-full bg-background border border-borderLine rounded-xl pr-11 pl-4 py-3.5 focus:outline-none focus:border-primary transition-all text-textMain text-sm">
+                        </div>
+                    </div>
+
+                    <!-- زر خيار حفظ الحساب عند تسجيل الدخول -->
+                    <label class="flex items-center justify-between p-3 rounded-xl bg-background border border-borderLine cursor-pointer hover:border-primary/50 transition-all select-none">
+                        <div class="flex items-center gap-2.5">
+                            <input type="checkbox" id="save-account-checkbox" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+                            <div>
+                                <span class="text-xs font-bold text-textMain block">حفظ الحساب للدخول السريع</span>
+                                <span class="text-[10px] text-textMuted block">العودة لحسابك بضغطة واحدة بعد الخروج</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-bookmark text-primary text-xs"></i>
+                    </label>
+
+                    <button onclick="submitAuth()" id="auth-submit-btn"
+                        class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-4 rounded-xl transition-all mt-2 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.99]">
+                        <span id="auth-btn-text">دخول للحساب</span>
+                        <i class="fa-solid fa-arrow-left text-sm"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -327,8 +408,8 @@
     <!-- ========================================================================= -->
     <div class="flex-1 flex flex-col h-full overflow-hidden bg-background relative">
 
-        <!-- شريط علوي للهاتف فقط (يبدو كتطبيق جوال أصلي) -->
-        <header class="md:hidden flex items-center justify-between px-4 pt-safe pb-3 bg-surface/90 backdrop-blur-md border-b border-borderLine z-30 shrink-0">
+        <!-- شريط علوي للهاتف فقط (بدون ضبابية، خلفية صلبة واضحة) -->
+        <header class="md:hidden flex items-center justify-between px-4 pt-safe pb-3 bg-surface border-b border-borderLine z-30 shrink-0">
             <div class="flex items-center gap-2.5">
                 <img src="123.png" alt="FLOW" class="w-8 h-8 rounded-xl object-cover border border-borderLine bg-background" onerror="this.style.display='none'">
                 <img id="mob-my-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" class="w-9 h-9 rounded-full border border-borderLine bg-background">
@@ -351,8 +432,8 @@
             </div>
         </header>
 
-        <!-- شريط علوي للكمبيوتر فقط (يعرض عنوان القسم وسرعة النقل) -->
-        <header class="hidden md:flex items-center justify-between px-8 py-5 border-b border-borderLine bg-surface/40 shrink-0">
+        <!-- شريط علوي للكمبيوتر فقط (بدون ضبابية، خلفية صلبة واضحة) -->
+        <header class="hidden md:flex items-center justify-between px-8 py-5 border-b border-borderLine bg-surface shrink-0">
             <div>
                 <h2 id="desktop-page-title" class="text-2xl font-black text-textMain">صندوق الوارد</h2>
                 <p id="desktop-page-subtitle" class="text-xs text-textMuted mt-0.5">جميع الملفات والصور المستلمة من أصدقائك</p>
@@ -371,39 +452,17 @@
 
                 <!-- 1. صفحة صندوق الوارد -->
                 <section id="page-inbox" class="app-page page-transition">
-                    <!-- عنوان يظهر في الهاتف فقط -->
-                    <div class="flex md:hidden items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-xl font-black text-textMain">صندوق الوارد</h2>
-                            <p class="text-xs text-textMuted">الملفات المستلمة حديثاً</p>
-                        </div>
-                        <span id="mob-inbox-count" class="bg-surfaceCard border border-borderLine text-primary font-black text-xs px-3 py-1.5 rounded-xl">0 ملف</span>
-                    </div>
-
                     <div id="inbox-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5"></div>
                 </section>
 
                 <!-- 2. صفحة الصادر -->
                 <section id="page-outbox" class="app-page hidden page-transition">
-                    <div class="flex md:hidden items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-xl font-black text-textMain">الملفات المرسلة</h2>
-                            <p class="text-xs text-textMuted">سجل الإرسال الخاص بك</p>
-                        </div>
-                        <span id="mob-outbox-count" class="bg-surfaceCard border border-borderLine text-primary font-black text-xs px-3 py-1.5 rounded-xl">0 ملف</span>
-                    </div>
-
                     <div id="outbox-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5"></div>
                 </section>
 
                 <!-- 3. صفحة إرسال ملف (واضحة وسريعة) -->
                 <section id="page-send" class="app-page hidden page-transition">
                     <div class="max-w-2xl mx-auto">
-                        <div class="md:hidden mb-4">
-                            <h2 class="text-xl font-black text-textMain">إرسال ملف</h2>
-                            <p class="text-xs text-textMuted">نقل فوري بسرعة مضاعفة 20 مرة</p>
-                        </div>
-
                         <div class="bg-surfaceCard border border-borderLine rounded-3xl p-5 sm:p-7 shadow-xl space-y-6">
                             
                             <!-- الخطوة 1: اختيار المستلم -->
@@ -538,36 +597,32 @@
         <!-- ========================================================================= -->
         <!-- ==================== شريط التنقل السفلي للهواتف فقط ==================== -->
         <!-- ========================================================================= -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xl border-t border-borderLine flex justify-around items-center px-2 pt-2 pb-safe z-40">
-            <button onclick="navigate('inbox')" id="mob-tab-inbox" class="mob-nav-btn active flex-1 py-1 flex flex-col items-center gap-1 text-textMuted transition-all">
-                <div class="mob-icon-box w-10 h-7 rounded-full flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-inbox text-base"></i>
-                </div>
-                <span class="text-[10px] font-bold">الوارد</span>
-            </button>
+        <div class="md:hidden fixed bottom-5 left-0 right-0 px-5 pb-safe z-40 pointer-events-none flex justify-center">
+            <nav class="mob-glass-pill w-full max-w-[360px] flex items-center justify-between gap-1 pointer-events-auto">
+                <!-- تبويب الوارد -->
+                <button onclick="navigate('inbox')" id="mob-tab-inbox" title="صندوق الوارد" class="mob-nav-btn active">
+                    <i class="fa-solid fa-house tab-icon"></i>
+                </button>
 
-            <button onclick="navigate('outbox')" id="mob-tab-outbox" class="mob-nav-btn flex-1 py-1 flex flex-col items-center gap-1 text-textMuted transition-all">
-                <div class="mob-icon-box w-10 h-7 rounded-full flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-clock-rotate-left text-base"></i>
-                </div>
-                <span class="text-[10px] font-bold">الصادر</span>
-            </button>
+                <!-- تبويب الصادر -->
+                <button onclick="navigate('outbox')" id="mob-tab-outbox" title="الملفات المرسلة" class="mob-nav-btn">
+                    <i class="fa-regular fa-circle-check tab-icon"></i>
+                </button>
 
-            <button onclick="navigate('send')" id="mob-tab-send" class="mob-nav-btn flex-1 py-1 flex flex-col items-center gap-1 text-textMuted transition-all">
-                <div class="mob-icon-box w-10 h-7 rounded-full flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-paper-plane text-base"></i>
-                </div>
-                <span class="text-[10px] font-bold">إرسال</span>
-            </button>
+                <!-- تبويب إرسال -->
+                <button onclick="navigate('send')" id="mob-tab-send" title="إرسال ملف" class="mob-nav-btn">
+                    <i class="fa-solid fa-paper-plane tab-icon"></i>
+                </button>
 
-            <button onclick="navigate('contacts')" id="mob-tab-contacts" class="mob-nav-btn flex-1 py-1 flex flex-col items-center gap-1 text-textMuted transition-all relative">
-                <div class="mob-icon-box w-10 h-7 rounded-full flex items-center justify-center transition-all relative">
-                    <i class="fa-solid fa-user-group text-base"></i>
-                    <span id="mob-pending-dot" class="hidden absolute top-0.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-surface"></span>
-                </div>
-                <span class="text-[10px] font-bold">الأصدقاء</span>
-            </button>
-        </nav>
+                <!-- تبويب الأصدقاء -->
+                <button onclick="navigate('contacts')" id="mob-tab-contacts" title="الأصدقاء والدليل" class="mob-nav-btn relative">
+                    <div class="relative flex items-center justify-center">
+                        <i class="fa-solid fa-bullseye tab-icon"></i>
+                        <span id="mob-pending-dot" class="hidden absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-zinc-900"></span>
+                    </div>
+                </button>
+            </nav>
+        </div>
 
     </div>
 
@@ -598,10 +653,145 @@
         let currentPage = 'inbox';
         let selectedFile = null;
         let authMode = 'login';
+        let pendingSaveCredentials = null; // لتخزين بيانات الحساب مؤقتاً لحين جلب ملفه الشخصي
 
         const USERS_PATH = 'users';
         const MESSAGES_PATH = 'messages';
         const CONNECTIONS_PATH = 'connections';
+        const SAVED_ACCOUNTS_COOKIE = 'flow_saved_accounts_v1';
+
+        // ==================== إدارة حفظ الحسابات (دخول سريع + حذف حساب محفوظ) ====================
+        function getSavedAccounts() {
+            try {
+                const match = document.cookie.match(new RegExp('(^| )' + SAVED_ACCOUNTS_COOKIE + '=([^;]+)'));
+                if (match) {
+                    return JSON.parse(decodeURIComponent(match[2]));
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            return [];
+        }
+
+        function setSavedAccounts(accountsList) {
+            try {
+                const encoded = encodeURIComponent(JSON.stringify(accountsList));
+                // حفظ لمدة سنة كاملة في ملف تعريف الارتباط للمتصفح
+                document.cookie = `${SAVED_ACCOUNTS_COOKIE}=${encoded}; path=/; max-age=31536000; SameSite=Lax`;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function saveAccountToDevice(accountObj) {
+            let accounts = getSavedAccounts();
+            // تحديث الحساب إذا كان موجوداً مسبقاً أو إضافته في المقدمة
+            accounts = accounts.filter(a => a.name.toLowerCase() !== accountObj.name.toLowerCase());
+            accounts.unshift({
+                name: accountObj.name,
+                pass: accountObj.pass,
+                avatar: accountObj.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
+                shortId: accountObj.shortId || '-----'
+            });
+            setSavedAccounts(accounts.slice(0, 5)); // حفظ حتى 5 حسابات
+        }
+
+        window.removeSavedAccount = (name, e) => {
+            if (e) e.stopPropagation();
+            showConfirmModal('حذف الحساب المحفوظ', `هل تريد إزالة الحساب "${name}" من قائمة الدخول السريع؟`, () => {
+                let accounts = getSavedAccounts();
+                accounts = accounts.filter(a => a.name.toLowerCase() !== name.toLowerCase());
+                setSavedAccounts(accounts);
+                renderSavedAccountsUI();
+                showToast('تم حذف الحساب المحفوظ من الجهاز', 'info');
+            });
+        };
+
+        window.showSavedAccountsView = () => {
+            const accounts = getSavedAccounts();
+            if (accounts.length === 0) {
+                showManualAuthForm();
+                return;
+            }
+            document.getElementById('saved-accounts-view').classList.remove('hidden');
+            document.getElementById('manual-auth-view').classList.add('hidden');
+            renderSavedAccountsUI();
+        };
+
+        window.showManualAuthForm = () => {
+            const accounts = getSavedAccounts();
+            document.getElementById('saved-accounts-view').classList.add('hidden');
+            document.getElementById('manual-auth-view').classList.remove('hidden');
+            const backBtn = document.getElementById('back-to-saved-btn');
+            if (accounts.length > 0) {
+                backBtn.classList.remove('hidden');
+                backBtn.classList.add('flex');
+            } else {
+                backBtn.classList.add('hidden');
+                backBtn.classList.remove('flex');
+            }
+        };
+
+        function renderSavedAccountsUI() {
+            const accounts = getSavedAccounts();
+            const listEl = document.getElementById('saved-accounts-list');
+            if (!listEl) return;
+
+            if (accounts.length === 0) {
+                showManualAuthForm();
+                return;
+            }
+
+            listEl.innerHTML = '';
+            accounts.forEach((acc, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-background border border-borderLine hover:border-primary/60 rounded-2xl p-3 flex items-center justify-between gap-3 cursor-pointer transition-all group';
+                card.onclick = () => quickLoginSavedAccount(idx);
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <img src="${acc.avatar}" class="w-11 h-11 rounded-full border border-borderLine bg-surfaceCard shrink-0">
+                        <div class="min-w-0 flex-1 text-right">
+                            <h4 class="text-sm font-bold text-textMain truncate group-hover:text-primary transition-colors">${acc.name}</h4>
+                            <span class="text-[11px] text-textMuted font-mono block">#${acc.shortId || '----'} • اضغط للدخول</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" title="حذف الحساب المحفوظ" class="del-saved-btn w-8 h-8 rounded-xl bg-surfaceCard hover:bg-rose-500/15 text-textMuted hover:text-rose-500 border border-borderLine flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                        <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                            <i class="fa-solid fa-arrow-left text-xs"></i>
+                        </div>
+                    </div>
+                `;
+                // ربط زر الحذف
+                card.querySelector('.del-saved-btn').addEventListener('click', (e) => {
+                    window.removeSavedAccount(acc.name, e);
+                });
+                listEl.appendChild(card);
+            });
+        }
+
+        window.quickLoginSavedAccount = async (index) => {
+            const accounts = getSavedAccounts();
+            const acc = accounts[index];
+            if (!acc) return;
+
+            const hexName = Array.from(acc.name.toLowerCase()).map(c => c.charCodeAt(0).toString(16)).join('');
+            const syntheticEmail = `u_${hexName}@flow.local`;
+
+            showToast(`جاري تسجيل الدخول كـ ${acc.name}...`, 'info');
+            pendingSaveCredentials = { name: acc.name, pass: acc.pass, shouldSave: true };
+
+            try {
+                await signInWithEmailAndPassword(auth, syntheticEmail, acc.pass);
+                showToast(`مرحباً بعودتك ${acc.name}!`, 'success');
+            } catch (err) {
+                showToast('تعذر الدخول السريع، ربما تغيرت كلمة المرور', 'error');
+                showManualAuthForm();
+                document.getElementById('setup-name-input').value = acc.name;
+            }
+        };
 
         // ==================== دالة الإشعارات الأنيقة (بديل alert) ====================
         window.showToast = (message, type = 'info') => {
@@ -681,11 +871,36 @@
                             myUser.shortId = generateShortId();
                             await updateDoc(userRef, { shortId: myUser.shortId });
                         }
+
+                        // إذا اختار المستخدم حفظ الحساب، نقوم بحفظ بياناته مع صورته ومعرفه
+                        if (pendingSaveCredentials && pendingSaveCredentials.shouldSave) {
+                            saveAccountToDevice({
+                                name: myUser.name || pendingSaveCredentials.name,
+                                pass: pendingSaveCredentials.pass,
+                                avatar: myUser.avatar,
+                                shortId: myUser.shortId
+                            });
+                            pendingSaveCredentials = null;
+                        } else {
+                            // تحديث الصورة والمعرف للحساب إذا كان محفوظاً مسبقاً
+                            const existingSaved = getSavedAccounts();
+                            const matched = existingSaved.find(a => a.name.toLowerCase() === (myUser.name || '').toLowerCase());
+                            if (matched) {
+                                saveAccountToDevice({
+                                    name: myUser.name,
+                                    pass: matched.pass,
+                                    avatar: myUser.avatar,
+                                    shortId: myUser.shortId
+                                });
+                            }
+                        }
+
                         updateMyProfileUI();
                         startDataListeners();
                     } else {
                         setupModal.classList.remove('hidden');
                         setupModal.classList.add('flex');
+                        showSavedAccountsView();
                     }
                 } catch (error) {
                     showToast('تعذر الاتصال بالخادم، تحقق من الإنترنت', 'error');
@@ -694,6 +909,7 @@
                 loading.classList.add('opacity-0', 'pointer-events-none');
                 setupModal.classList.remove('hidden');
                 setupModal.classList.add('flex');
+                showSavedAccountsView();
             }
         });
 
@@ -723,6 +939,7 @@
         window.submitAuth = async () => {
             const nameInput = document.getElementById('setup-name-input').value.trim();
             const passInput = document.getElementById('setup-password-input').value;
+            const shouldSave = document.getElementById('save-account-checkbox')?.checked;
 
             if (!nameInput) return showToast('يرجى كتابة اسم المستخدم', 'error');
             if (!passInput || passInput.length < 6) return showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
@@ -734,25 +951,38 @@
             const originalText = btnText.innerText;
             btnText.innerText = 'جاري التحقق...';
 
+            pendingSaveCredentials = { name: nameInput, pass: passInput, shouldSave: shouldSave };
+
             try {
                 if (authMode === 'register') {
                     const userCredential = await createUserWithEmailAndPassword(auth, syntheticEmail, passInput);
                     const user = userCredential.user;
                     const seed = Math.random().toString(36).substring(7);
                     const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=6366f1`;
+                    const newShortId = generateShortId();
 
                     await setDoc(doc(db, USERS_PATH, user.uid), {
                         name: nameInput,
                         avatar: avatarUrl,
-                        shortId: generateShortId(),
+                        shortId: newShortId,
                         timestamp: serverTimestamp()
                     });
+
+                    if (shouldSave) {
+                        saveAccountToDevice({
+                            name: nameInput,
+                            pass: passInput,
+                            avatar: avatarUrl,
+                            shortId: newShortId
+                        });
+                    }
                     showToast('تم إنشاء حسابك بنجاح!', 'success');
                 } else {
                     await signInWithEmailAndPassword(auth, syntheticEmail, passInput);
                     showToast('مرحباً بعودتك!', 'success');
                 }
             } catch (err) {
+                pendingSaveCredentials = null;
                 if (err.code === 'auth/email-already-in-use' && authMode === 'register') {
                     showToast('اسم المستخدم مسجل مسبقاً، اختر اسماً آخر أو سجل دخولك', 'error');
                 } else {
@@ -824,6 +1054,8 @@
             if (pageMeta[pageId]) {
                 document.getElementById('desktop-page-title').textContent = pageMeta[pageId].title;
                 document.getElementById('desktop-page-subtitle').textContent = pageMeta[pageId].subtitle;
+                document.getElementById('mob-page-title').textContent = pageMeta[pageId].title;
+                document.getElementById('mob-page-subtitle').textContent = pageMeta[pageId].subtitle;
             }
 
             document.querySelectorAll('.app-page').forEach(page => page.classList.add('hidden'));
@@ -831,6 +1063,7 @@
             targetPage.classList.remove('hidden');
 
             currentPage = pageId;
+            updateCountsUI();
 
             if (pageId === 'inbox' || pageId === 'outbox') renderFilesGrid();
             if (pageId === 'contacts') renderContactsPage();
@@ -883,6 +1116,7 @@
                 if (!document.getElementById('recipient-modal').classList.contains('hidden')) {
                     renderRecipientModalList();
                 }
+                updateCountsUI();
             }, (err) => console.error(err));
 
             onSnapshot(collection(db, MESSAGES_PATH), (snapshot) => {
@@ -911,8 +1145,23 @@
 
             document.getElementById('side-inbox-badge').textContent = inboxCount;
             document.getElementById('side-outbox-badge').textContent = outboxCount;
-            document.getElementById('mob-inbox-count').textContent = `${inboxCount} ملف`;
-            document.getElementById('mob-outbox-count').textContent = `${outboxCount} ملف`;
+
+            const mobBadge = document.getElementById('mob-header-badge');
+            if (mobBadge) {
+                if (currentPage === 'inbox') {
+                    mobBadge.textContent = `${inboxCount} ملف`;
+                    mobBadge.classList.remove('hidden');
+                } else if (currentPage === 'outbox') {
+                    mobBadge.textContent = `${outboxCount} ملف`;
+                    mobBadge.classList.remove('hidden');
+                } else if (currentPage === 'contacts') {
+                    const friendsCount = getMyFriends().length;
+                    mobBadge.textContent = `${friendsCount} صديق`;
+                    mobBadge.classList.remove('hidden');
+                } else {
+                    mobBadge.classList.add('hidden');
+                }
+            }
         }
 
         function getMyFriends() {
